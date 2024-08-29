@@ -1,0 +1,28 @@
+.
+├── App.js
+├── app.json
+├── assets
+│   ├── adaptive-icon.png
+│   ├── favicon.png
+│   ├── icon.png
+│   ├── logoBAMX.png
+│   └── splash.png
+├── babel.config.js
+├── components
+│   ├── Button.jsx
+│   └── navbar.jsx
+├── .expo
+│   ├── devices.json
+│   └── README.md
+├── .gitignore
+├── input.txt
+├── package.json
+├── package-lock.json
+└── screens
+    ├── archivescreen.jsx
+    ├── homescreen.jsx
+    ├── loginscreen.jsx
+    ├── profilescreen.jsx
+    └── registerscreen.jsx
+
+4 directories, 21 files
