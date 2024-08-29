@@ -32,10 +32,15 @@ export default function App() {
           tabBarStyle: {
             marginVertical: 5,
             backgroundColor: '#fff',
-            position: 'aboslute', 
-            bottom: 0,
+            position: 'absolute', 
+            marginBottom: 0,
             width: '100%',
+            height: "6%",
+          },  
+          tabBarLabelStyle:{
+            paddingBottom: 5,
           },
+          tabBarActiveTintColor: "red",
         })}
       >
         <Tab.Screen name="Inicio" component={HomeScreen} />
@@ -49,7 +54,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'red',
     alignItems: 'center',
     justifyContent: 'center',
   },
