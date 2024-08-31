@@ -13,13 +13,13 @@ const RegisterScreen = () => {
       <Button
         title="Registrarme como Persona"
         onPress={() => navigation.navigate('RegisterPerson')}
-        style={[styles.button, { backgroundColor: 'blue' }]}
+        style={[styles.button, { backgroundColor: '#f5a800' }]}
       />
 
       <Button
         title="Registrarme como Empresa"
         onPress={() => navigation.navigate('RegisterCompany')}
-        style={[styles.button, { backgroundColor: 'red' }]}
+        style={[styles.button, { backgroundColor: '#ce0e2d' }]}
       />
     </View>
   );

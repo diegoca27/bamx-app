@@ -128,11 +128,11 @@ const styles = StyleSheet.create({
     padding: 10, 
   },
   errorText: {
-    color: 'red',
+    color: '#ce0e2d',
     marginBottom: 10,
   },
   button: {
-    backgroundColor: 'red',
+    backgroundColor: '#ce0e2d',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
