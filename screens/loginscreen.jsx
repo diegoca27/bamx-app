@@ -10,16 +10,13 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const onSubmit = async (data) => {
     try {
-      // 1. Lógica de Autenticación:
-      //    - Aquí enviarías los datos del formulario (`data`) a tu API 
-      //    - Simularemos una autenticación exitosa con un setTimeout
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      // 1. Lógica de Autenticación
 
       // 2. Redirigir a "HomeTabs" 
       navigation.navigate('HomeTabs'); 
 
     } catch (error) {
-      // Manejar errores de autenticación (mostrar mensaje al usuario, etc.)
+      // Manejar errores de autenticación
       console.error("Error en la autenticación:", error);
     }
   };

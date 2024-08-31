@@ -4,21 +4,22 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Importa tus pantallas
+// Importar pantallas
 import HomeScreen from './screens/homescreen';
 import ArchiveScreen from './screens/archivescreen';
 import ProfileScreen from './screens/profilescreen';
 import LoginScreen from './screens/loginscreen'; 
 import RegisterScreen from './screens/registerscreen'; 
+import RegisterPersonScreen from './screens/registerscreen/registerpersonscreen'; 
+import RegisterCompanyScreen from './screens/registerscreen/registercompanyscreen'; 
+import MultiStepForm from './components/MultiStepForm';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function HomeTabs() {
   const { height } = useWindowDimensions();  
-  const insets = useSafeAreaInsets(); 
 
   return (
     <Tab.Navigator
@@ -66,7 +67,14 @@ export default function App() {
           component={LoginScreen}
           options={{ headerShown: false }} 
         />
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen
+          name="Register" 
+          component={RegisterScreen} 
+
+        />
+        <Stack.Screen name="RegisterPerson" component={RegisterPersonScreen} />
+        <Stack.Screen name="RegisterCompany" component={RegisterCompanyScreen} />
+        <Stack.Screen name="MultiStepForm" component={MultiStepForm} />
         <Stack.Screen
           name="HomeTabs"
           component={HomeTabs}
