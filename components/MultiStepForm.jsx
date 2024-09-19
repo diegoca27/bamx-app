@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
+import globalStyles  from '../styles/global';
 
 const MultiStepForm = ({ children, onSubmit }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -19,10 +20,10 @@ const MultiStepForm = ({ children, onSubmit }) => {
     <View style={styles.container}>
       <ProgressSteps 
         activeStep={activeStep}
-        completedProgressBarColor={'red'} 
-        activeStepIconBorderColor={'red'}
-        activeLabelColor={'red'}
-        completedStepIconColor={'red'}
+        completedProgressBarColor={globalStyles.primaryRed.color} 
+        activeStepIconBorderColor={globalStyles.primaryRed.color}
+        activeLabelColor={globalStyles.primaryRed.color}
+        completedStepIconColor={globalStyles.primaryRed.color}
       >
         {children.map((child, index) => (
           <ProgressStep 
@@ -62,13 +63,13 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     button: {
-        backgroundColor: 'red',
+        backgroundColor: globalStyles.primaryRed.color,
         padding: 15,
         borderRadius: 5,
         margin: 10,
     },
     buttonText: {
-        color: 'red',
+        color: globalStyles.primaryRed.color,
         fontWeight: 'bold',
     },
 });

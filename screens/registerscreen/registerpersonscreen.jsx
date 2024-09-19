@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Switch, Platform } from 'react-native';
 import MultiStepForm from '../../components/MultiStepForm';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import PhoneInput from 'react-native-phone-input';
 import CountryPicker from 'react-native-country-picker-modal';
+import globalStyles from '../../styles/global';
 
 const RegisterPersonScreen = () => {
 
@@ -81,7 +81,7 @@ const RegisterPersonScreen = () => {
           </View> 
           <Text style={styles.label}>Fecha de Nacimiento:</Text>
           <View> 
-            <Button onPress={showDatepicker} title="Seleccionar Fecha" color="red" />
+            <Button onPress={showDatepicker} title="Seleccionar Fecha" color={globalStyles.primaryRed.color} />
             {showDatePicker && (
               <DateTimePicker
                 value={formData.birthDate ? new Date(formData.birthDate) : new Date()}
@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
   label: {
     fontSize: 16,
