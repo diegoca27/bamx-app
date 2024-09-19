@@ -147,14 +147,14 @@ export default function App() {
             component={HomeTabs}
             options={{ headerShown: false }}
           />
-           <Stack.Screen 
+        <Stack.Screen 
           name="OrderDetails" 
           component={OrderDetails} 
           options={{ title: 'Detalles de alerta', 
             headerTitleAlign: 'center',
             headerShadowVisible: false,
-           }}
-        />
+          }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>
