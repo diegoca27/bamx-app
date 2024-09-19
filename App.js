@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, useWindowDimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, useWindowDimensions, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,6 +18,7 @@ import RegisterCompanyScreen from './screens/registerscreen/registercompanyscree
 import MultiStepForm from './components/MultiStepForm';
 import { UserProvider } from './context/UserContext';
 import globalStyles from './styles/global';
+import OrderDetails from './screens/orderdetails';
 
 LogBox.ignoreLogs([
   'Warning: Main: Support for defaultProps will be removed',
@@ -36,6 +37,11 @@ function HomeTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerTitle: () => <LogoTitle/>,
+        headerTitleAlign: 'center',
+        headerStyle: {
+        backgroundColor: '#ffff',
+        },
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
@@ -67,6 +73,15 @@ function HomeTabs() {
       <Tab.Screen name="Historial" component={ArchiveScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+function LogoTitle(){
+  return(
+    <Image
+    style = {{ width: 80, height: 50}}
+    source = {require('./assets/logoBAMX.png')}
+    />
   );
 }
 
@@ -132,6 +147,14 @@ export default function App() {
             component={HomeTabs}
             options={{ headerShown: false }}
           />
+           <Stack.Screen 
+          name="OrderDetails" 
+          component={OrderDetails} 
+          options={{ title: 'Detalles de alerta', 
+            headerTitleAlign: 'center',
+            headerShadowVisible: false,
+           }}
+        />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>
