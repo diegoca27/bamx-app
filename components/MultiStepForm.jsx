@@ -19,6 +19,7 @@ const MultiStepForm = ({ children, onSubmit }) => {
   return (
     <View style={styles.container}>
       <ProgressSteps 
+        style={styles.progressSteps}
         activeStep={activeStep}
         completedProgressBarColor={globalStyles.primaryRed.color} 
         activeStepIconBorderColor={globalStyles.primaryRed.color}
@@ -49,10 +50,12 @@ const MultiStepForm = ({ children, onSubmit }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-    },
+        padding: 0,
+        marginTop: -30,
+      },
     stepContent: {
         flex: 1,
+        marginTop: 15,
     },
     buttonLeft: {
         alignSelf: 'flex-start',

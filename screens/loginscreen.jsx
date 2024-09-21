@@ -19,11 +19,12 @@ const LoginScreen = () => {
       // Simulacion de la entrada de datos
       const userData = {
         userType: 'persona',
-        avatar: 'https://cdn.psychologytoday.com/sites/default/files/styles/article-inline-half-caption/public/field_blog_entry_images/2022-03/art-hauntington-0wrxaxqip58-unsplash.jpg?itok=DEJmZb4P',
+        //avatar: 'https://cdn.psychologytoday.com/sites/default/files/styles/article-inline-half-caption/public/field_blog_entry_images/2022-03/art-hauntington-0wrxaxqip58-unsplash.jpg?itok=DEJmZb4P',
+        avatar: 'https://www.informador.mx/__export/1684928035463/sites/elinformador/img/2023/05/24/banco_de_alimentos_x11373714x_crop1684928034621.jpg_423682103.jpg',
         avatarBackground: 'https://thumbs.dreamstime.com/b/woman-holding-mask-her-happy-face-sad-67645678.jpg',
-        name: 'Diana Bravo', 
+        name: 'Banco de Alimentos GDA', 
         location: 'Zapopan, Jalisco, 45019',
-        email: 'orrin2004@gmail.com',
+        email: 'bdagda@gmail.com',
         phone: '+52 425-770-0904',
       };
 

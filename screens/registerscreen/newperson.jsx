@@ -5,7 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import CountryPicker from 'react-native-country-picker-modal';
 import globalStyles from '../../styles/global';
 
-const RegisterPersonScreen = () => {
+const NewPerson = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    borderRadius: 12,
   },
   phoneContainer: {
     flexDirection: 'row',
@@ -220,7 +221,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginLeft: 10,
     paddingHorizontal: 10,
+    borderRadius: 12,
   },
 });
 
-export default RegisterPersonScreen;
+export default NewPerson;
