@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import MultiStepForm from '../../components/MultiStepForm';
 import RNPickerSelect from 'react-native-picker-select'; 
 
+
 const NewCompany = () => {
   const [formData, setFormData] = useState({
     companyName: '',

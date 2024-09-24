@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from 'react-native-elements';
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import globalStyles from '../styles/global';
 
 const RegisterScreen = () => {

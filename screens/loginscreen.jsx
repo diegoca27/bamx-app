@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, set } from 'react-hook-form';
 import { Icon } from 'react-native-elements'
 import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { useContext } from 'react'; 
 import { UserContext } from '../context/UserContext'; 
+import { auth } from '../config/firebaseConfig'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 const LoginScreen = () => {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const navigation = useNavigation();
   const { setUser } = useContext(UserContext); 
+  const [authError, setAuthError] = useState(null);
 
   const onSubmit = async (data) => {
+    const { usuario, contraseña } = data;
     try {
       // 1. Lógica de Autenticación
+      const userCredential = await signInWithEmailAndPassword(auth, usuario, contraseña);
+      const user = userCredential.user;
       
       // Simulacion de la entrada de datos
       const userData = {
@@ -36,6 +42,7 @@ const LoginScreen = () => {
 
     } catch (error) {
       // Manejar errores de autenticación
+      setAuthError(error.message);
       console.error("Error en la autenticación:", error);
     }
   };
