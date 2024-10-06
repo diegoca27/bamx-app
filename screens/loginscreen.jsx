@@ -41,6 +41,7 @@ const LoginScreen = () => {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                accessibilityLabel="Usuario" 
               />
               <Icon
                  name='user'
@@ -66,6 +67,7 @@ const LoginScreen = () => {
                 onChangeText={onChange}
                 value={value}
                 secureTextEntry={true} 
+                accessibilityLabel="Contraseña"
               />
               <Icon
                  name='lock'
@@ -83,6 +85,7 @@ const LoginScreen = () => {
           onPress={handleSubmit(onSubmit)} 
           style={styles.button} 
           textStyle={styles.buttonText} 
+          accessibilityLabel="Iniciar sesión"
         />
 
         <View style={styles.registerContainer}>
