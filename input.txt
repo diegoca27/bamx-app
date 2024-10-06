@@ -1,28 +1,61 @@
 .
+├── android
+│   ├── app
+│   ├── build.gradle
+│   ├── gradle
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   └── settings.gradle
 ├── App.js
 ├── app.json
 ├── assets
 │   ├── adaptive-icon.png
 │   ├── favicon.png
 │   ├── icon.png
+│   ├── ingredients.png
 │   ├── logoBAMX.png
+│   ├── noimage.png
+│   ├── pizza.png
+│   ├── prepared-food.png
 │   └── splash.png
 ├── babel.config.js
 ├── components
 │   ├── Button.jsx
-│   └── navbar.jsx
-├── .expo
-│   ├── devices.json
-│   └── README.md
-├── .gitignore
+│   ├── foodorder.jsx
+│   ├── MultiStepForm.jsx
+│   ├── navbar.jsx
+│   ├── orderstatetext.jsx
+│   ├── profileheader.jsx
+│   ├── profileinfo.jsx
+│   └── stateinfo.jsx
+├── config
+│   └── firebaseConfig.js
+├── context
+│   └── UserContext.js
+├── eas.json
 ├── input.txt
+├── ios
+│   ├── bamxApp
+│   ├── bamxAppTests
+│   ├── bamxApp.xcodeproj
+│   └── Podfile
+├── node_modules
 ├── package.json
 ├── package-lock.json
-└── screens
-    ├── archivescreen.jsx
-    ├── homescreen.jsx
-    ├── loginscreen.jsx
-    ├── profilescreen.jsx
-    └── registerscreen.jsx
+├── README.md
+├── screens
+│   ├── archivescreen.jsx
+│   ├── homescreen.jsx
+│   ├── homescreenperson.jsx
+│   ├── loginscreen.jsx
+│   ├── orderdetails.jsx
+│   ├── profilescreen.jsx
+│   ├── registerscreen
+│   └── registerscreen.jsx
+├── styles
+│   └── global.js
+├── styles.js
+└── tsconfig.json
 
-4 directories, 21 files
+678 directories, 43 files
