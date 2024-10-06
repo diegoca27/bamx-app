@@ -5,25 +5,30 @@ export default function HomeScreen() {
     return (
         <View style = {styles.container}>
         <ScrollView contentContainerStyle = {styles.contentContainer}>
+          <Text style = {styles.pageTitle}>Alertas en curso</Text>
           <FoodOrder 
           foodElement = "Pizza"
-          orderState = "En proceso de asignación"
+          orderState = "Pendiente"
+          quantity = "2"
+          imageID = "1"
+          />
+          <FoodOrder 
+          foodElement = "Hamburguesa"
+          orderState = "Pendiente"
           quantity = "3"
+          imageID = "2"
           />
           <FoodOrder 
           foodElement = "Pizza"
-          orderState = "En proceso de asignación"
+          orderState = "Cancelado"
           quantity = "3"
+          imageID = "1"
           />
           <FoodOrder 
           foodElement = "Pizza"
-          orderState = "En proceso de asignación"
+          orderState = "Pendiente"
           quantity = "3"
-          />
-          <FoodOrder 
-          foodElement = "Pizza"
-          orderState = "En proceso de asignación"
-          quantity = "3"
+          imageID = "1"
           />
         </ScrollView>
           <TouchableOpacity style = {styles.floatingButton}>
@@ -40,7 +45,7 @@ export default function HomeScreen() {
     },
     contentContainer:{
       alignItems: 'center',
-      paddingBottom: 80,
+      paddingBottom: 60,
     },
     floatingButton:{
       position: 'absolute',
@@ -61,6 +66,10 @@ export default function HomeScreen() {
     buttonText:{
       color: 'white',
       fontSize: 28,
-
-    }
+    },
+    pageTitle:{
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginTop: 20,
+    },
   })

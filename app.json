@@ -24,14 +24,14 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.diegoca27.bamxapp"
+      "package": "com.diegoca_04.bamxapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "927bed9a-2f50-4dfd-af9e-48daaac391f5"
+        "projectId": "51cf0589-fdcd-4005-b5fe-dd6c61440b32"
       }
     }
   }

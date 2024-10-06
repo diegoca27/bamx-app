@@ -3,7 +3,8 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import MultiStepForm from '../../components/MultiStepForm';
 import RNPickerSelect from 'react-native-picker-select'; 
 
-const RegisterCompanyScreen = () => {
+
+const NewCompany = () => {
   const [formData, setFormData] = useState({
     companyName: '',
     companyType: null, 
@@ -95,9 +96,9 @@ const pickerSelectStyles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: 'gray',
-    borderRadius: 4,
+    borderRadius: 12,
     color: 'black',
     paddingRight: 30, // Espacio para el icono
   },
@@ -118,6 +119,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
   label: {
     fontSize: 16,
@@ -126,9 +128,10 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: 'gray',
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginBottom: 20,
     paddingHorizontal: 10,
+    borderRadius: 12,
   },
   phoneContainer: {
     flexDirection: 'row',
@@ -149,4 +152,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterCompanyScreen;
+export default NewCompany;
