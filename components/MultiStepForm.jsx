@@ -3,7 +3,7 @@ import { View, Button, StyleSheet } from 'react-native';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import globalStyles  from '../styles/global';
 
-const MultiStepForm = ({ children, onSubmit }) => {
+const MultiStepForm = ({ children, onSubmit, isNextEnabled }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = () => {
@@ -32,9 +32,11 @@ const MultiStepForm = ({ children, onSubmit }) => {
             label={`Paso ${index + 1}`} 
             onNext={handleNext} 
             onPrevious={handleBack}
+            onSubmit = {onSubmit}
             nextBtnTextStyle={styles.buttonText}
             previousBtnTextStyle={styles.buttonText}
             nextBtnStyle={styles.buttonRight}
+            nextBtnDisabled={index === 0 && !isNextEnabled} 
             previousBtnStyle={styles.buttonLeft}
           >
             <View style={styles.stepContent}>
