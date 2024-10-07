@@ -88,6 +88,7 @@ const LoginScreen = () => {
                 onChangeText={onChange}
                 value={value}
                 secureTextEntry={!passwordVisible} // Mostrar u ocultar contraseña
+                accessibilityLabel="Contraseña"
               />
               {isTypingPassword && ( // Mostrar ojito solo cuando se está escribiendo y hay texto
                 <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
@@ -99,9 +100,6 @@ const LoginScreen = () => {
                   />
                 </TouchableOpacity>
               )}
-                secureTextEntry={true} 
-                accessibilityLabel="Contraseña"
-              />
               <Icon
                 name='lock'
                 type='font-awesome'
