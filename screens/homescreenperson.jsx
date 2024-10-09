@@ -9,6 +9,10 @@ import BottomSheet, { BottomSheetFlatList, BottomSheetScrollView, BottomSheetMod
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { UserContext } from '../context/UserContext';
+import { useNavigation } from '@react-navigation/native';
+import { v4 as uuidv4 } from 'uuid';
+
+import InstructionsScreen from './instructionscreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -157,8 +161,11 @@ const HomeScreenPerson = () => {
   const [markerSize, setMarkerSize] = useState(40); // Tamaño inicial
   const [showMarkers, setShowMarkers] = useState(true); // Inicializar showMarkers
   const confirmationSheetRef = useRef(null);
+  const navigation = useNavigation();
 
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const [showInstructions, setShowInstructions] = useState(false);
 
   // Función para manejar la reserva 
   const handleReserve = () => {
@@ -172,10 +179,43 @@ const HomeScreenPerson = () => {
   };
 
   const handlePayment = () => {
-    // Lógica para procesar la reserva
-    // ...
-  };
+    // 1. Obtener la fecha y hora actual
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString();
 
+    // 2. Crear orderData
+    const orderData = {
+      customer: {
+        id: user.id, // Asumiendo que tu usuario tiene un ID
+        name: user.name, // Obtener el nombre del usuario
+        email: user.email,
+      },
+      restaurant: {
+        id: selectedProduct.id,
+        name: selectedProduct.name,
+      },
+      items: [
+        {
+          productId: selectedProduct.id,
+          name: selectedProduct.name,
+          quantity: quantity,
+          price: selectedProduct.price,
+          
+        },
+      ],
+      totalAmount: selectedProduct.price * quantity,
+      date: formattedDate, // Agregar la fecha al pedido
+      time: formattedTime, // Agregar la hora al pedido
+      paymentMethod: 'Efectivo', // Ejemplo: Efectivo, Tarjeta, etc.
+      status: 'Pendiente', // Ejemplo: Pendiente, En proceso, Listo para recoger, etc. 
+      specialInstructions: 'Sin picante, por favor', // Campo para instrucciones especiales
+    };
+    setShowInstructions(true);
+    setShowConfirmation(false); // Cierra el BottomSheet de confirmación
+    productSheetRef.current?.close(); // Cierra el BottomSheet del producto
+    navigation.navigate('Instructions', { orderData }); 
+  };
 
   // Función para manejar la selección de un producto
   const handleProductSelect = (product) => {
@@ -197,6 +237,7 @@ const HomeScreenPerson = () => {
         snapPoints={['70%', '90%']}
         backgroundStyle={{ backgroundColor: theme.colors.surface }}
         handleIndicatorStyle={{ backgroundColor: theme.colors.primary }}
+        enablePanDownToClose={true} 
         // Escucha el evento onChange para actualizar el estado isProductSheetOpen
         onChange={(index) => {
           setIsProductSheetOpen(index !== -1);
@@ -499,7 +540,6 @@ const HomeScreenPerson = () => {
   const renderConfirmationBottomSheet = () => {
     const totalPrice = selectedProduct ? selectedProduct.price * quantity : 0;
 
-
     // Función para actualizar confirmationSheetRef cuando el BottomSheet se abre
     const handleConfirmationSheetOpen = (sheetInstance) => {
       confirmationSheetRef.current = sheetInstance;
@@ -515,6 +555,7 @@ const HomeScreenPerson = () => {
         enablePanDownToClose={true} // Habilitar cierre con swipe down
         onAnimateOpenEnd={handleConfirmationSheetOpen}
       >
+        
         <View style={styles.confirmationContainer}>
           {/* Nombre del restaurante */}
           <Text style={styles.restaurantName}>
@@ -592,6 +633,7 @@ const HomeScreenPerson = () => {
             style={styles.buyButton}
             onPress={handlePayment}
             disabled={quantity === 0}
+            
           >
             <Text style={styles.buyButtonText}>Pagar en efectivo</Text>
 
@@ -662,8 +704,6 @@ const HomeScreenPerson = () => {
           renderItem={renderItem}
         />
       </BottomSheet>
-
-
 
       {/* Bottom Sheet para la información del producto */}
       {renderProductBottomSheet()}
@@ -1020,7 +1060,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    backgroundColor: 'red',
+    backgroundColor: '#ce0e2d',
     alignItems: 'center',
   },
   reserveButtonText: {
@@ -1116,7 +1156,7 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
   },
   buyButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#ce0e2d',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

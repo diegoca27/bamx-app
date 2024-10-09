@@ -21,6 +21,7 @@ import MultiStepForm from './components/MultiStepForm';
 import { UserProvider, UserContext } from './context/UserContext';
 import globalStyles from './styles/global';
 import OrderDetails from './screens/orderdetails';
+import InstructionsScreen from './screens/instructionscreen';
 
 LogBox.ignoreLogs([
   'Warning: Main: Support for defaultProps will be removed',
@@ -227,6 +228,10 @@ export default function App() {
                 headerTitleAlign: 'center',
                 headerShadowVisible: false,
               }}
+            />
+            <Stack.Screen name="Instructions"
+              component={InstructionsScreen}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         </NavigationContainer>
