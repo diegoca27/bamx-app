@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Switch, Platform, TouchableOpacity, Image } from 'react-native';
 import { Icon } from 'react-native-elements';
 import MultiStepForm from '../../components/MultiStepForm';
@@ -13,11 +13,49 @@ import { db } from "../../config/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const NewPerson = () => {
-
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [error, setError] =  useState('');
+  const [passwordError, setpasswordError] =  useState('');
+  const [errorStep1, setErrorStep1] = useState({
+    name: '',
+    email: '',
+    birthDate: '',
+    phone: '',
+    URLPhoto: '',
+  });
+
+  const [errorStep2, setErrorStep2] = useState({
+    address: '',
+    colonia: '',
+    city: '',
+    postalCode: '',
+  });
+
+  const [errorStep3, setErrorStep3] = useState({
+    householdSize: '',
+    monthlyIncome: '',
+    hasDisability: '',
+  });
+
+  const [errorStep4, setErrorStep4] = useState({
+    acceptTerms: '',
+  })
+
   const [isNextEnabled, setIsNextEnabled] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [prevStep, setPrevStep] = useState(0);
+
+  const handleNext = () => {
+    setActiveStep(prevStep => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    if (activeStep > 0) {
+      setActiveStep(prevStep => prevStep - 1);
+    }
+  };
+  
   const [image, setImage] = useState(null);
+  const [isImageUploaded, setIsImageUploaded] = useState(false);
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -31,7 +69,7 @@ const NewPerson = () => {
     email: '',
     password: '',
     confirmedpassword: '',
-    IDPhoto:'',
+    URLPhoto:'',
     address: '',
     colonia: '',
     city: '',
@@ -45,15 +83,42 @@ const NewPerson = () => {
     acceptTerms: false,
   });
 
-  const handleBirthDateChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios'); // En iOS hay que ocultarlo manualmente
-    if (event.type === 'set') {
-      setFormData({ ...formData, birthDate: selectedDate });
+  useEffect(() => {
+    if (activeStep == 0){
+      validateStep1();
     }
+    else if (activeStep == 1){
+      validateStep2();
+    }
+    else if (activeStep == 2){
+      validateStep3();
+    }
+    else{
+      validateStep4();
+    }
+    setPrevStep(activeStep)
+  }, [activeStep, formData, isImageUploaded]); 
+
+  const handleBirthDateChange = (event, selectedDate) => {
+    if (event.type === 'set') {
+      setFormData({ ...formData, birthDate: selectedDate});
+    }
+    setShowDatePicker(false);
   };
 
   const showDatepicker = () => {
     setShowDatePicker(true);
+  };
+
+  const formattedBirthDate = formData.birthDate ? formData.birthDate.toLocaleDateString() : '';
+
+  const toggleState = () => {
+    if(!isNextEnabled){
+      setIsNextEnabled(true);
+    }
+    else{
+      setIsNextEnabled(false);
+    }
   };
 
   const selectImage = async () => {
@@ -74,7 +139,10 @@ const NewPerson = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const selectedImageUri = result.assets[0].uri; // Obtener la URI local de la imagen
+      setImage(selectedImageUri); // Actualizar la imagen localmente
+      setIsImageUploaded(true);   // Marcar que ya se tiene una imagen localmente
+      console.log('Imagen seleccionada localmente');
     }
   };
 
@@ -97,36 +165,37 @@ const NewPerson = () => {
       // Actualiza formData con la URL de la imagen
       setFormData((prevData) => ({
         ...prevData,
-        IDPhoto: downloadURL, // Añade el campo de la URL de la imagen
+        URLPhoto: downloadURL, // Añade el campo de la URL de la imagen
       }));
   
       return downloadURL; // Devuelve la URL para confirmar la subida
     } catch (error) {
-      console.error('Error al subir la imagen: ', error);
-      throw new Error('Error al subir la imagen'); // Lanza un error si falla la subida
+      console.error('error al subir la imagen: ', error);
+      throw new error('error al subir la imagen'); // Lanza un error si falla la subida
     }
   };
 
   const handleSubmit = async() => {
-    const { email, password, IDPhoto } = formData;
-
-  // Verifica que los campos importantes existan
-  if (!email || !password) {
-    console.error('Faltan el correo electrónico o la contraseña');
-    return;
-  }
+    const { name, password, birthDate, phone, countryCode, country, email, URLPhoto, address, colonia } = formData;
 
   try {
     // Si no se ha seleccionado imagen, devuelve un mensaje de error
-    if (!image) {
-      alert("Por favor, selecciona una imagen de identificación antes de continuar.");
-      return;
-    }
+    const selectedData = {
+      name,
+      birthDate,
+      phone,
+      countryCode,
+      country,
+      email,
+      URLPhoto,
+      address,
+      colonia,
+    };
 
     // Subir la imagen primero
     const downloadURL = await handleImageUpload(image);
     if (!downloadURL) {
-      console.error("Error en la subida de la imagen.");
+      console.error("error en la subida de la imagen.");
       return;
     }
 
@@ -137,39 +206,125 @@ const NewPerson = () => {
 
     // Guardar los datos del formulario en Firestore con la URL de la imagen
     await setDoc(doc(db, "users", user.uid), {
-      ...formData,  // Incluye todos los datos del formulario
+      ...selectedData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
       uid: user.uid,
       userType: 'persona',
-      IDPhoto: downloadURL,
+      URLPhoto: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });
 
     console.log("Datos guardados exitosamente en Firestore");
   } catch (error) {
-    console.error("Error al registrar usuario o guardar datos:", error);
+    console.error("error al registrar usuario o guardar datos:", error);
   }
   };
 
-  const validatePassword= () => {
-    const { password, confirmedpassword } = formData;
-    if (!password || !confirmedpassword) {
-      setError('Ambos campos de contraseña son obligatorios');
-      setIsNextEnabled(false);
+  const validateStep1 = () => {
+  setIsNextEnabled(false);
+  const newErrors = {};
+  // Validar Nombre
+  if (formData.name == '') {
+    newErrors.name = 'Este campo es obligatorio';
+  }
+
+  // Validar Correo Electrónico
+  if (formData.email == '') {
+    newErrors.email = 'Este campo es obligatorio';
+  }
+
+  // Validar Fecha de Nacimiento
+  if (!formData.birthDate) {
+    newErrors.birthDate = 'Este campo es obligatorio';
+  }
+
+  // Validar Número de Teléfono
+  if (formData.phone.length < 10){
+    newErrors.phone = 'El número de teléfono debe ser válido'
+  }
+  else if (formData.phone == '') {
+    newErrors.phone = 'Este campo es obligatorio';
+  }
+
+  // Validar Imagen de Identificación (URL de la imagen)
+  if (!isImageUploaded) {
+    newErrors.URLPhoto = 'Este campo es obligatorio';
+  }
+
+  // Validar Contraseñas
+  const { password, confirmedpassword } = formData;
+  if (!password || !confirmedpassword) {
+    newErrors.password = 'Ambos campos de contraseña son obligatorios';
+    newErrors.confirmedpassword = 'Ambos campos de contraseña son obligatorios';
+  } else if (password.length < 6) {
+    newErrors.confirmedpassword = 'La contraseña debe tener al menos 6 caracteres';
+  } else if (password !== confirmedpassword) {
+    newErrors.confirmedpassword = 'Las contraseñas no coinciden';
+  }
+
+  // Establecer los errores
+  setErrorStep1(newErrors);
+
+  // Si no hay errores, habilitar el botón "Siguiente"
+  const hasErrors = Object.keys(newErrors).length > 0;
+  setIsNextEnabled(!hasErrors && isImageUploaded);
+  };
+  
+  const printForm = () => {
+    console.log(formData);
+  }
+
+  const validateStep2 = () => {
+    setIsNextEnabled(false);
+    const newErrors2 = {};
+    if(formData.address == ''){
+      newErrors2.address = 'Este campo es obligatorio';
     }
-    else if (password.length < 6){
-      setError('La contrasena tiene que tener al menos 6 caracteres');
-      setIsNextEnabled(false);
+    if(formData.colonia == ''){
+      newErrors2.colonia = 'Este campo es obligatorio';
     }
-    else if (password !== confirmedpassword) {
-      setError('Las contraseñas no coinciden');
-      setIsNextEnabled(false);
-    } else {
-      setError('');
-      setIsNextEnabled(true);
+    if(formData.city == ''){
+      newErrors2.city = 'Este campo es obligatorio';
     }
+    if(formData.postalCode == ''){
+      newErrors2.postalCode = 'Este campo es obligatorio';
+    }
+    setErrorStep2(newErrors2);
+    
+    // Si no hay errores, habilitar el botón "Siguiente"
+    const hasErrors2 = Object.keys(newErrors2).length > 0;
+    setIsNextEnabled(!hasErrors2);
   };
 
+  const validateStep3 = () => {
+    setIsNextEnabled(false);
+    const newErrors3 = {};
+    if(formData.householdSize == ''){
+      newErrors3.householdSize = 'Este campo es obligatorio';
+    }
+    if(formData.monthlyIncome == ''){
+      newErrors3.monthlyIncome = 'Este campo es obligatorio';
+    }
+    
+    setErrorStep3(newErrors3);
+
+    // Si no hay errores, habilitar el botón "Siguiente"
+    const hasErrors3 = Object.keys(newErrors3).length > 0;
+    setIsNextEnabled(!hasErrors3);
+  };
+
+  const validateStep4 = () => {
+    const newErrors4 = {};
+    setIsNextEnabled(false);
+    if(formData.acceptTerms == false){
+      newErrors4.acceptTerms = 'Este campo es obligatorio';
+    }
+
+    setErrorStep4(newErrors4);
+    const hasErrors4 = Object.keys(newErrors4).length > 0;
+    setIsNextEnabled(!hasErrors4);
+  }
+
   const handlePhoneChange = (phoneNumber) => {
-    setFormData({ ...formData, phoneNumber });
+    setFormData({ ...formData, phone: phoneNumber});
   };
 
   const handleCountryChange = (country) => {
@@ -178,32 +333,44 @@ const NewPerson = () => {
 
   return (
     <View style={styles.container}>
-      <MultiStepForm onSubmit={handleSubmit} isNextEnabled={isNextEnabled}>
+      <MultiStepForm 
+      onSubmit={handleSubmit} 
+      currentStep={activeStep}
+      onNext={handleNext}
+      onPrevious={handleBack}
+      isNextEnabled={isNextEnabled}>
         {/* Paso 1: Información Personal */}
         <View>
-          <Text style={styles.label}>Nombre Completo:</Text>
+          <Text style={styles.label}>Nombre Completo: <Text style = {styles.errorText}>*</Text></Text>
           <TextInput 
             style={styles.input}
-            onChangeText={text => setFormData({ ...formData, name: text })}
+            onChangeText={text => {
+              setFormData({ ...formData, name: text });
+            }}
             value={formData.name}
             placeholder="Ej. Cosme Ramirez Anaya"
-          />
+            />
+          {errorStep1 ? <Text style={styles.errorText}>{errorStep1.name}</Text> : null}
           <View>
-          <Text style={styles.label}>Correo Electrónico:</Text>
+          <Text style={styles.label}>Correo Electrónico: <Text style = {styles.errorText}>*</Text></Text>
           <TextInput
             style={styles.input}
-            onChangeText={text => setFormData({ ...formData, email: text })}
+            onChangeText={text => {
+              setFormData({ ...formData, email: text });
+            }}
+            value={formData.email}
             keyboardType="email-address"
             placeholder="Ej. ejemplo@correo.com"
           />
-          <Text style={styles.label}>Contraseña:</Text>
+          {errorStep1 ? <Text style={styles.errorText}>{errorStep1.email}</Text> : null}
+          <Text style={styles.label}>Contraseña: <Text style = {styles.errorText}>*</Text></Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          onChangeText={text => { setFormData({ ...formData, password: text }); validatePassword(); }}
+          onChangeText={text => { setFormData({ ...formData, password: text });}}
+          value={formData.password}
           secureTextEntry={!passwordVisible}
           placeholder="Contraseña"
-          onBlur={validatePassword}
         />
         <TouchableOpacity
           onPress={() => setPasswordVisible(!passwordVisible)}
@@ -218,15 +385,16 @@ const NewPerson = () => {
         </TouchableOpacity>
       </View>
 
-          <Text style={styles.label}>Confirmar contraseña:</Text>
+          <Text style={styles.label}>Confirmar contraseña: <Text style = {styles.errorText}>*</Text></Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            onChangeText={text => { setFormData({ ...formData, confirmedpassword: text }); validatePassword(); }}
+            onChangeText={text => { setFormData({ ...formData, confirmedpassword: text });}}
+            value={formData.confirmedpassword}
             secureTextEntry={!confirmPasswordVisible}
             placeholder="Confirmar contraseña"
-            onBlur={validatePassword}
           />
+          {errorStep1 ? <Text style={styles.errorText}>{errorStep1.confirmedpassword}</Text> : null}
           <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)} style={styles.iconContainer}>
             <Icon
               name={confirmPasswordVisible ? 'eye' : 'eye-slash'}
@@ -236,13 +404,13 @@ const NewPerson = () => {
             />
           </TouchableOpacity>
         </View>
-
           
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {passwordError ? <Text style={styles.errorText}>{errorStep1.password}</Text> : null}
           </View> 
-          <Text style={styles.label}>Fecha de Nacimiento:</Text>
-          <View> 
-            <Button onPress={showDatepicker} title="Seleccionar Fecha" color={globalStyles.primaryRed.color} />
+          <Text style={styles.label}>Fecha de Nacimiento: <Text style = {styles.errorText}>*</Text></Text>
+          <View style={{marginBottom: 10}}> 
+            <Text style={styles.dateText}>{formattedBirthDate}</Text>
+            <Button onPress={showDatepicker} title="Seleccionar Fecha" color={globalStyles.primaryRed.color}/>
             {showDatePicker && (
               <DateTimePicker
                 value={formData.birthDate ? new Date(formData.birthDate) : new Date()}
@@ -252,7 +420,8 @@ const NewPerson = () => {
               />
             )}
           </View> 
-          <Text style={styles.label}>Número de Teléfono:</Text>
+            {errorStep1 ? <Text style={styles.errorText}>{errorStep1.birthDate}</Text> : null}
+          <Text style={styles.label}>Número de Teléfono: <Text style = {styles.errorText}>*</Text></Text>
           <View style={styles.phoneContainer}>
           <CountryPicker
               countryCode={formData.country}
@@ -264,16 +433,19 @@ const NewPerson = () => {
             <Text style={styles.countryCode}>+{formData.countryCode}</Text>
             <TextInput
               style={styles.phoneInput}
+              value={formData.phone}
               onChangeText={handlePhoneChange}
               keyboardType="phone-pad"
               placeholder="Ej. 333 000 0000"
             />
           </View>
-            <View>
-              <Text style={styles.label}>Sube una imagen de tu identificación</Text>
-            <Button title="Seleccionar Imagen" onPress={selectImage} color={globalStyles.primaryRed.color} />
-            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+          {errorStep1 ? <Text style={styles.errorText}>{errorStep1.phone}</Text> : null}
+            <View style={{marginBottom: 10}}>
+              <Text style={styles.label}>Sube una imagen de tu identificación: <Text style = {styles.errorText}>*</Text></Text>
+            <Button title="Seleccionar Imagen" onPress={selectImage} color={globalStyles.primaryRed.color}/>
+            {image && <Image source={{ uri: image }} style={{ width: 400, height: 200, alignSelf: 'center', marginTop: 10}} />}
             </View>
+            {errorStep1 ? <Text style={styles.errorText}>{errorStep1.URLPhoto}</Text> : null}
         </View>
         
         {/* Paso 2: Información de Dirección */}
@@ -284,18 +456,21 @@ const NewPerson = () => {
             onChangeText={text => setFormData({ ...formData, address: text })}
             value={formData.address}
           />
+          {errorStep2 ? <Text style={styles.errorText}>{errorStep2.address}</Text> : null}
           <Text style={styles.label}>Colonia:</Text>
           <TextInput 
             style={styles.input}
             onChangeText={text => setFormData({ ...formData, colonia: text })}
             value={formData.colonia}
           />
+          {errorStep2 ? <Text style={styles.errorText}>{errorStep2.colonia}</Text> : null}
           <Text style={styles.label}>Ciudad:</Text>
           <TextInput 
             style={styles.input}
             onChangeText={text => setFormData({ ...formData, city: text })}
             value={formData.city}
           />
+          {errorStep2 ? <Text style={styles.errorText}>{errorStep2.city}</Text> : null}
           <Text style={styles.label}>Código Postal:</Text>
           <TextInput 
             style={styles.input}
@@ -303,6 +478,7 @@ const NewPerson = () => {
             onChangeText={text => setFormData({ ...formData, postalCode: text })}
             value={formData.postalCode}
           />
+          {errorStep2 ? <Text style={styles.errorText}>{errorStep2.postalCode}</Text> : null}
         </View>
         
         {/* Paso 3: Información Familiar */}
@@ -314,12 +490,15 @@ const NewPerson = () => {
             onChangeText={text => setFormData({ ...formData, householdSize: text })}
             value={formData.householdSize}
           />
+          {errorStep3 ? <Text style={styles.errorText}>{errorStep3.householdSize}</Text> : null}
           <Text style={styles.label}>Ingreso Mensual del Hogar (Rango):</Text>
           <TextInput 
             style={styles.input}
+            keyboardType='numeric'
             onChangeText={text => setFormData({ ...formData, monthlyIncome: text })}
             value={formData.monthlyIncome}
           />
+          {errorStep3 ? <Text style={styles.errorText}>{errorStep3.monthlyIncome}</Text> : null}
           <Text style={styles.label}>¿Posee algún tipo de discapacidad o necesidad especial?</Text>
           <Switch 
             value={formData.hasDisability} 
@@ -342,11 +521,12 @@ const NewPerson = () => {
             value={formData.receiveNotifications} 
             onValueChange={value => setFormData({ ...formData, receiveNotifications: value })}
           />
-          <Text style={styles.label}>Acepto los términos y condiciones</Text>
+          <Text style={styles.label}>Acepto los términos y condiciones <Text style={styles.errorText}>*</Text></Text>
           <Switch 
             value={formData.acceptTerms} 
             onValueChange={value => setFormData({ ...formData, acceptTerms: value })}
           />
+          {errorStep4 ? <Text style={styles.errorText}>{errorStep4.acceptTerms}</Text> : null}
         </View>
       </MultiStepForm>
     </View>
@@ -368,7 +548,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 12,
   },
@@ -397,7 +577,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#ce0e2d',
-    marginBottom: 10,
+  },
+  dateText: {
+    alignSelf: 'center',
+    marginVertical: 10,
+    fontWeight: 'bold',
   },
 });
 
