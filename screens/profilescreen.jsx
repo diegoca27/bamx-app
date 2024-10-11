@@ -13,8 +13,8 @@ export default function ProfileScreen() {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileHeader
-          avatar={user.avatar}
-          avatarBackground={user.avatarBackground}
+          avatar={user.IDPhoto}
+          avatarBackground={user.IDPhoto}
           name={user.name}
           location={user.location}
         />

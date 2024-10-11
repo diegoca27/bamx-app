@@ -135,18 +135,20 @@ function LogoTitle() {
 }
 
 function HomeTabs() {
-  const { user, isLoading } = useContext(UserContext);
+  const { user, userType, isLoading } = useContext(UserContext);
+
+  console.log("HomeTabs - User:", user); // <-- Aquí
+  console.log("HomeTabs - UserType:", userType); // <-- Aquí
 
   if (isLoading) {
     return <LoadingScreen />; 
   }
 
-  if (user && user.userType === 'persona') {
+  if (userType === 'persona') {
     return <PersonHome />;
-  } else if (user && user.userType === 'empresa') {
+  } else if (userType === 'empresa') {
     return <CompanyHome />; 
   } else {
-    // Si no hay usuario o el tipo no es válido, redirige al login
     return (
       <Stack.Navigator>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />

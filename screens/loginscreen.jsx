@@ -1,45 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Icon } from 'react-native-elements';
 import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
-import { useContext } from 'react'; 
-import { UserContext } from '../context/UserContext'; 
-import { auth } from '../config/firebaseConfig';
+import { UserContext } from '../context/UserContext';
+import { auth, firestore } from '../config/firebaseConfig';  
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';  
 
 const LoginScreen = () => {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const navigation = useNavigation();
-  const { setUser } = useContext(UserContext); 
+  const { setUser, setUserType } = useContext(UserContext);
   const [authError, setAuthError] = useState(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isTypingPassword, setIsTypingPassword] = useState(false);
 
   const onSubmit = async (data) => {
-    const { usuario, contraseña } = data;
+    const { email, password } = data;
+  
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, usuario, contraseña);
+      // Iniciar sesión con Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      const userData = {
-        userType: 'persona',
-        avatar: 'https://www.informador.mx/__export/1684928035463/sites/elinformador/img/2023/05/24/banco_de_alimentos_x11373714x_crop1684928034621.jpg_423682103.jpg',
-        avatarBackground: 'https://thumbs.dreamstime.com/b/woman-holding-mask-her-happy-face-sad-67645678.jpg',
-        name: 'Banco de Alimentos GDA', 
-        location: 'Zapopan, Jalisco, 45019',
-        email: 'bdagda@gmail.com',
-        phone: '+52 425-770-0904',
-      };
-
-      setUser(userData);
-      navigation.navigate('HomeTabs');
+  
+      // Buscar el usuario primero en la colección "users"
+      const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+  
+      if (userDoc.exists()) { 
+        // Si existe en "users", cargar los datos
+        const userData = userDoc.data();
+        setUser(userData);  // Guardar usuario en el contexto
+        setUserType(userData.userType);  // Guardar el tipo de usuario en el contexto
+        navigation.navigate('HomeTabs');
+      } else {
+        // Si no existe en "users", buscar en "companies"
+        const companyDoc = await getDoc(doc(firestore, 'companies', user.uid));
+        if (companyDoc.exists()) {
+          // Si el usuario está en "companies", cargar los datos
+          const companyData = companyDoc.data();
+          setUser(companyData);  // Guardar usuario en el contexto
+          setUserType(companyData.userType);  // Guardar el tipo de usuario en el contexto
+          navigation.navigate('HomeTabs');
+        } else {
+          // Si no se encuentra en ninguna colección, mostrar error
+          setAuthError('Usuario no encontrado en ninguna colección.');
+        }
+      }
     } catch (error) {
-      setAuthError(error.message);
-      console.error("Error en la autenticación:", error);
+      // Manejo de errores en caso de fallar el inicio de sesión
+      setAuthError('Error al iniciar sesión. Por favor, revisa tus credenciales.');
     }
-  };
+  };  
+  
+  
 
   return (
     <View style={styles.container}>
@@ -49,34 +64,37 @@ const LoginScreen = () => {
       />
       <Text style={styles.title}>Inicio de sesión</Text>
       <View style={styles.formContainer}>
-        <Controller
-          control={control}
-          name="usuario"
-          rules={{ required: 'El usuario es requerido' }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Usuario"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                accessibilityLabel="Usuario" 
-              />
-              <Icon
-                name='user'
-                type='font-awesome'
-                color='#808080'
-                size={20}
-              />
-            </View>
-          )}
-        />
-        {errors.usuario && <Text style={styles.errorText}>{errors.usuario.message}</Text>}
+      <Controller
+        control={control}
+        name="email" 
+        rules={{ required: 'El correo electrónico es requerido' }}  
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Correo electrónico"  
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              keyboardType="email-address"  
+              autoCapitalize="none" 
+              accessibilityLabel="Correo electrónico" 
+            />
+            <Icon
+              name='envelope'
+              type='font-awesome'
+              color='#808080'
+              size={20}
+            />
+          </View>
+        )}
+      />
+      {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+
 
         <Controller
           control={control}
-          name="contraseña"
+          name="password"
           rules={{ required: 'La contraseña es requerida' }}
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.inputContainer}>
@@ -87,10 +105,10 @@ const LoginScreen = () => {
                 onFocus={() => setIsTypingPassword(true)}
                 onChangeText={onChange}
                 value={value}
-                secureTextEntry={!passwordVisible} // Mostrar u ocultar contraseña
+                secureTextEntry={!passwordVisible} 
                 accessibilityLabel="Contraseña"
               />
-              {isTypingPassword && ( // Mostrar ojito solo cuando se está escribiendo y hay texto
+              {isTypingPassword && (
                 <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
                   <Icon
                     name={passwordVisible ? 'eye' : 'eye-slash'}
@@ -111,6 +129,8 @@ const LoginScreen = () => {
           )}
         />
         {errors.contraseña && <Text style={styles.errorText}>{errors.contraseña.message}</Text>}
+
+        {authError && <Text style={styles.errorText}>{authError}</Text>}
 
         <Button 
           title="Iniciar sesión" 

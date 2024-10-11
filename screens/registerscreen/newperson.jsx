@@ -8,7 +8,7 @@ import globalStyles from '../../styles/global';
 import * as ImagePicker from 'expo-image-picker';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -136,10 +136,11 @@ const NewPerson = () => {
     console.log("Usuario registrado exitosamente:", user);
 
     // Guardar los datos del formulario en Firestore con la URL de la imagen
-    await addDoc(collection(db, "users"), {
-      ...formData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
+    await setDoc(doc(db, "users", user.uid), {
+      ...formData,  // Incluye todos los datos del formulario
       uid: user.uid,
-      IDPhoto: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
+      userType: 'persona',
+      IDPhoto: downloadURL,
     });
 
     console.log("Datos guardados exitosamente en Firestore");

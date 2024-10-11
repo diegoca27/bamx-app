@@ -82,7 +82,7 @@ const sampleData = [
   },
   {
     id: 5,
-    name: 'Banco de Alimentos B',
+    name: ' B',
     type: 'Ingredientes',
     rating: 4.8,
     distance: '1.2',
