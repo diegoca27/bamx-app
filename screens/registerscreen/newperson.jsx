@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Switch, Platform, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Switch, Platform, TouchableOpacity, Image, Alert } from 'react-native';
 import { Icon } from 'react-native-elements';
 import MultiStepForm from '../../components/MultiStepForm';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -121,22 +121,34 @@ const NewPerson = () => {
     }
   };
 
-  const selectImage = async () => {
-    // Pide permiso para acceder a la galería
+  const pickImage = async (fromCamera = true) => {
+    // Solicitar permisos
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (permissionResult.granted === false) {
-      alert("Se necesita permiso para acceder a la galería.");
+    const cameraPermissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false || cameraPermissionResult.granted === false) {
+      alert("Es necesario otorgar permisos para acceder a la cámara o galería.");
       return;
     }
 
-    // Abre la galería para seleccionar una imagen
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    let result;
+
+    if (fromCamera) {
+      // Lanzar la cámara
+      result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+    } else {
+      // Lanzar la galería
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+    }
 
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri; // Obtener la URI local de la imagen
@@ -144,6 +156,28 @@ const NewPerson = () => {
       setIsImageUploaded(true);   // Marcar que ya se tiene una imagen localmente
       console.log('Imagen seleccionada localmente');
     }
+  };
+
+  const showImagePickerOptions = () => {
+    // Mostrar opciones para elegir entre cámara o galería
+    Alert.alert(
+      "Seleccionar Imagen",
+      "Elige si deseas tomar una nueva foto o seleccionar una de la galería.",
+      [
+        {
+          text: "Tomar Foto",
+          onPress: () => pickImage(true), // Abrir cámara
+        },
+        {
+          text: "Seleccionar de la Galería",
+          onPress: () => pickImage(false), // Abrir galería
+        },
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+      ]
+    );
   };
 
   const handleImageUpload = async(uri) => {
@@ -442,7 +476,7 @@ const NewPerson = () => {
           {errorStep1 ? <Text style={styles.errorText}>{errorStep1.phone}</Text> : null}
             <View style={{marginBottom: 10}}>
               <Text style={styles.label}>Sube una imagen de tu identificación: <Text style = {styles.errorText}>*</Text></Text>
-            <Button title="Seleccionar Imagen" onPress={selectImage} color={globalStyles.primaryRed.color}/>
+            <Button title="Seleccionar Imagen" onPress={showImagePickerOptions} color={globalStyles.primaryRed.color}/>
             {image && <Image source={{ uri: image }} style={{ width: 400, height: 200, alignSelf: 'center', marginTop: 10}} />}
             </View>
             {errorStep1 ? <Text style={styles.errorText}>{errorStep1.URLPhoto}</Text> : null}
