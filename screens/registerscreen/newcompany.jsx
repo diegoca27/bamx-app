@@ -107,6 +107,7 @@ const NewCompany = () => {
     // Si no se ha seleccionado imagen, devuelve un mensaje de error
     const selectedData = {
       companyName,
+      email,
       contactPhone,
       address,
       contactPerson,
