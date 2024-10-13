@@ -24,6 +24,7 @@ import OrderDetails from './screens/orderdetails';
 import InstructionsScreen from './screens/instructionscreen';
 import QRScanner from './functions/QRScanner';
 import NewOrderScreen from './screens/neworder';
+import OrderRedemeed from './functions/OrderRedeemed';
 
 LogBox.ignoreLogs([
   'Warning: Main: Support for defaultProps will be removed',
@@ -250,6 +251,8 @@ export default function App() {
             component={QRScanner}
             options={{ title: 'Escanear QR' }} 
             />
+            <Stack.Screen name="OrderRedeemed" 
+            component={OrderRedemeed} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserProvider>

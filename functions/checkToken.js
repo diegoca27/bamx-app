@@ -2,7 +2,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig.js'; // Ajusta la ruta según tu estructura
 import { ColorSpace } from 'react-native-reanimated';
 
-const checkToken = async (token) => {
+const checkToken = async (token, navigation, setMessage) => {
     const docRef = doc(db, "orders", token);
 
     try {
@@ -17,13 +17,23 @@ const checkToken = async (token) => {
 
             if (status === "Pending") {
                 console.log("Código reclamado.");
+
+                navigation.navigate('OrderRedeemed', {
+                    productId: data.productId,
+                    quantity: data.quantity,
+                    totalPrice: data.totalPrice,
+                    userId: data.userId,
+                });
+
                 await updateDoc(docRef, {
                     orderStatus: "Usado"
                 });
             } else {
+                setMessage("Esta orden ya ha sido reclamada.");
                 console.log("Este código ya ha sido usado.");
             }
         } else {
+            setMessage("La orden no existe.");
             console.log(token);
             console.log("La orden no existe");
         }
