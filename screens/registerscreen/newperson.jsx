@@ -8,7 +8,7 @@ import globalStyles from '../../styles/global';
 import * as ImagePicker from 'expo-image-picker';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
-import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -473,11 +473,10 @@ const NewPerson = () => {
               placeholder="Ej. 333 000 0000"
             />
           </View>
-          {errorStep1 ? <Text style={styles.errorText}>{errorStep1.phone}</Text> : null}
-            <View style={{marginBottom: 10}}>
-              <Text style={styles.label}>Sube una imagen de tu identificación: <Text style = {styles.errorText}>*</Text></Text>
-            <Button title="Seleccionar Imagen" onPress={showImagePickerOptions} color={globalStyles.primaryRed.color}/>
-            {image && <Image source={{ uri: image }} style={{ width: 400, height: 200, alignSelf: 'center', marginTop: 10}} />}
+            <View>
+              <Text style={styles.label}>Sube una imagen de tu identificación</Text>
+            <Button title="Seleccionar Imagen" onPress={selectImage} color={globalStyles.primaryRed.color} />
+            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
             </View>
             {errorStep1 ? <Text style={styles.errorText}>{errorStep1.URLPhoto}</Text> : null}
         </View>

@@ -36,7 +36,7 @@ const LoginScreen = () => {
         navigation.navigate('HomeTabs');
       } else {
         // Si no existe en "users", buscar en "companies"
-        const companyDoc = await getDoc(doc(firestore, 'companies', user.uid));
+        const companyDoc = await getDoc(doc(firestore, 'company', user.uid));
         if (companyDoc.exists()) {
           // Si el usuario está en "companies", cargar los datos
           const companyData = companyDoc.data();
@@ -54,8 +54,6 @@ const LoginScreen = () => {
     }
   };  
   
-  
-
   return (
     <View style={styles.container}>
       <Image 

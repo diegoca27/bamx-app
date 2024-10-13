@@ -1,7 +1,15 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import FoodOrder from '../components/foodorder';
+import NewOrderScreen from './neworder';
+import { useNavigation } from "@react-navigation/native";
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
+
+  const newOrder = () => {
+    navigation.navigate('NewOrderScreen')
+  }
+
     return (
         <View style = {styles.container}>
         <ScrollView contentContainerStyle = {styles.contentContainer}>
@@ -31,7 +39,7 @@ export default function HomeScreen() {
           imageID = "1"
           />
         </ScrollView>
-          <TouchableOpacity style = {styles.floatingButton}>
+          <TouchableOpacity style = {styles.floatingButton} onPress={newOrder}>
               <Text style = {styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>

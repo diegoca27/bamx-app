@@ -23,6 +23,7 @@ import globalStyles from './styles/global';
 import OrderDetails from './screens/orderdetails';
 import InstructionsScreen from './screens/instructionscreen';
 import QRScanner from './functions/QRScanner';
+import NewOrderScreen from './screens/neworder';
 
 LogBox.ignoreLogs([
   'Warning: Main: Support for defaultProps will be removed',
@@ -141,9 +142,9 @@ function HomeTabs() {
   console.log("HomeTabs - User:", user); // <-- Aquí
   console.log("HomeTabs - UserType:", userType); // <-- Aquí
 
-  if (isLoading) {
-    return <LoadingScreen />; 
-  }
+  // if (isLoading) {
+  //   return <LoadingScreen />; 
+  // }
 
   if (userType === 'persona') {
     return <PersonHome />;
@@ -232,6 +233,15 @@ export default function App() {
                 headerShadowVisible: false,
               }}
             />
+             <Stack.Screen 
+             name="NewOrderScreen" 
+             component={NewOrderScreen}
+              options = {{
+                title: 'Nueva alerta',
+                headerTitleAlign: 'center',
+                headerShadowVisible: false,
+              }}
+             />
             <Stack.Screen name="Instructions"
               component={InstructionsScreen}
               options={{ headerShown: false }}
