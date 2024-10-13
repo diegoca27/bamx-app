@@ -42,6 +42,12 @@
           "locationAlwaysAndWhenInUsePermission": "Permite que $(PRODUCT_NAME) use tu ubicación para mostrarte donaciones cercanas.",
           "locationWhenInUsePermission": "Permite que $(PRODUCT_NAME) use tu ubicación mientras la app está en uso para mostrarte donaciones cercanas." 
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "El permiso es necesario para escanear códigos QR"
+        }
       ]
     ]
   }

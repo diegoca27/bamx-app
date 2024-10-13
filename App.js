@@ -22,6 +22,7 @@ import { UserProvider, UserContext } from './context/UserContext';
 import globalStyles from './styles/global';
 import OrderDetails from './screens/orderdetails';
 import InstructionsScreen from './screens/instructionscreen';
+import QRScanner from './functions/QRScanner';
 
 LogBox.ignoreLogs([
   'Warning: Main: Support for defaultProps will be removed',
@@ -234,6 +235,10 @@ export default function App() {
             <Stack.Screen name="Instructions"
               component={InstructionsScreen}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen name="QRScanner" 
+            component={QRScanner}
+            options={{ title: 'Escanear QR' }} 
             />
           </Stack.Navigator>
         </NavigationContainer>
