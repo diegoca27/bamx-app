@@ -1,10 +1,27 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
 import FoodOrder from '../components/foodorder';
 import NewOrderScreen from './neworder';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 import { useNavigation } from "@react-navigation/native";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'offers'), (snapshot) => { // Suscribirse a cambios en tiempo real
+      const ordersData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setOrders(ordersData); // Actualiza el estado con los datos nuevos
+    });
+
+    // Limpiar el listener al desmontar el componente
+    return () => unsubscribe();
+  }, []);
 
   const newOrder = () => {
     navigation.navigate('NewOrderScreen')
@@ -14,30 +31,18 @@ export default function HomeScreen() {
         <View style = {styles.container}>
         <ScrollView contentContainerStyle = {styles.contentContainer}>
           <Text style = {styles.pageTitle}>Alertas en curso</Text>
+          {orders
+          .filter(order => order.orderStatus === "En busca de recolector" || order.orderStatus === "Cancelado") // Filtrar por el estado
+          .map(order => (
           <FoodOrder 
-          foodElement = "Pizza"
-          orderState = "Pendiente"
-          quantity = "2"
-          imageID = "1"
+            key={order.id}
+            foodElement={order.productName}
+            orderState={order.orderStatus}
+            quantity={order.quantity}
+            imageURL={order.foodImage}
+            price = {order.totalPrice}
           />
-          <FoodOrder 
-          foodElement = "Hamburguesa"
-          orderState = "Pendiente"
-          quantity = "3"
-          imageID = "2"
-          />
-          <FoodOrder 
-          foodElement = "Pizza"
-          orderState = "Cancelado"
-          quantity = "3"
-          imageID = "1"
-          />
-          <FoodOrder 
-          foodElement = "Pizza"
-          orderState = "Pendiente"
-          quantity = "3"
-          imageID = "1"
-          />
+        ))}
         </ScrollView>
           <TouchableOpacity style = {styles.floatingButton} onPress={newOrder}>
               <Text style = {styles.buttonText}>+</Text>

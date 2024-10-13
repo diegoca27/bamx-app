@@ -15,11 +15,14 @@ export default function StateInfo(props) {
         <View style={styles.helpContainer}>
             <Text style={styles.alertText}>El producto ya fue entregado</Text>
             <Text style={styles.plainText}>Si ocurrió algún problema, contáctanos.</Text>
-            <Button title = "Crear nueva alerta" style= {styles.buttonStyle}/>
+            <Button 
+            title = "Crear nueva alerta" 
+            style= {styles.buttonStyle} 
+            onPress={() => {navigation.navigate('NewOrderScreen')}}/>
         </View>
         );  
     }
-    else if (props.orderState == "Pendiente"){
+    else if (props.orderState == "En busca de recolector"){
         return (
             <View style={styles.helpContainer}>
                 <Text style={styles.alertText}>¡Hemos encontrado un recolector!</Text>
@@ -39,7 +42,10 @@ export default function StateInfo(props) {
             <View style={styles.helpContainer}>
                 <Text style={styles.alertText}>El pedido fue cancelado</Text>
                 <Text style={styles.plainText}>Si ocurrió algún problema, contáctanos.</Text>
-                <Button title = "Crear nueva alerta" style= {styles.buttonStyle}/>
+                <Button 
+                title = "Crear nueva alerta" 
+                style= {styles.buttonStyle}
+                onPress={() => {navigation.navigate('NewOrderScreen')}}/>
             </View>
         );
     }

@@ -7,7 +7,7 @@ const OrderStateText = ({ orderState }) => {
     switch (state) {
       case 'Entregado':
         return styles.delivered;
-      case 'Pendiente':
+      case 'En busca de recolector':
         return styles.pending;
       case 'Cancelado':
         return styles.cancelled;

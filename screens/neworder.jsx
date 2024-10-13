@@ -6,18 +6,20 @@ import { db } from "../config/firebaseConfig";
 import { getAuth } from "firebase/auth";
 import globalStyles from '../styles/global';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from "@react-navigation/native";
 
 export default function NewOrderScreen() {
+const navigation = useNavigation();
 const [image, setImage] = useState(null);
 const [isImageUploaded, setIsImageUploaded] = useState(false);
 const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
 const [errorStep, setErrorStep] = useState({
-    productId: '',
+    productName: '',
     totalPrice: '',
     foodImage: '',
   });
   const [formData, setFormData] = useState({
-    productId: '',
+    productName: '',
     quantity: 1,
     totalPrice: '',
     orderTime: '',
@@ -140,15 +142,18 @@ const [errorStep, setErrorStep] = useState({
     }
 
     // Guardar los datos del formulario en Firestore con la URL de la imagen
-    await setDoc(doc(db, "orders", new Date().getTime().toString()), {
+    await setDoc(doc(db, "offers", new Date().getTime().toString()), {
       ...formData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
       uid: user.uid,
       orderTime: new Date(),
       orderStatus: 'En busca de recolector',
+      rating: 5,
       foodImage: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });
 
     console.log("Datos guardados exitosamente en Firestore");
+    navigation.navigate('HomeTabs');
+
   } catch (error) {
     console.error("error al crear nueva orden:", error);
   }
@@ -157,8 +162,8 @@ const [errorStep, setErrorStep] = useState({
   const validateAlert = () => {
     setIsSubmitEnabled(false);
     const newErrors = {};
-    if(formData.productId == ''){
-      newErrors.productId = 'Este campo es obligatorio';
+    if(formData.productName == ''){
+      newErrors.productName = 'Este campo es obligatorio';
     }
     if(formData.totalPrice == ''){
       newErrors.totalPrice = 'Este campo es obligatorio';
@@ -169,7 +174,6 @@ const [errorStep, setErrorStep] = useState({
     setErrorStep(newErrors);
     
     // Si no hay errores, habilitar el botón "Siguiente"
-    console.log(newErrors);
     const hasErrors = Object.keys(newErrors).length > 0;
     setIsSubmitEnabled(!hasErrors);
   }
@@ -183,12 +187,12 @@ const [errorStep, setErrorStep] = useState({
       <TextInput
         style={styles.input}
         onChangeText={text => {
-          setFormData({ ...formData, productId: text });
+          setFormData({ ...formData, productName: text });
         }}
-        value={formData.productId}
+        value={formData.productName}
         placeholder="Ej. Pizza"
       />
-      {errorStep ? <Text style={styles.errorText}>{errorStep.productId}</Text> : null}
+      {errorStep ? <Text style={styles.errorText}>{errorStep.productName}</Text> : null}
 
       <Text style={styles.label}>
         Cantidad: <Text style={styles.errorText}>*</Text>
