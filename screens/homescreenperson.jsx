@@ -168,6 +168,7 @@ const HomeScreenPerson = () => {
     productSheetRef.current?.expand();
   };
 
+  const [isProductSheetOpen, setIsProductSheetOpen] = useState(false);
   const renderProductBottomSheet = () => {
     return (
       <BottomSheet
