@@ -10,7 +10,7 @@ import QRScanner from '../functions/QRScanner';
 export default function StateInfo(props) {
     const navigation = useNavigation();
 
-    if (props.orderState == "Entregado"){
+    if (props.orderState == "Finalizado"){
         return(
         <View style={styles.helpContainer}>
             <Text style={styles.alertText}>El producto ya fue entregado</Text>
@@ -22,7 +22,7 @@ export default function StateInfo(props) {
         </View>
         );  
     }
-    else if (props.orderState == "En busca de recolector"){
+    else if (props.orderState == "Pendiente"){
         return (
             <View style={styles.helpContainer}>
                 <Text style={styles.alertText}>¡Hemos encontrado un recolector!</Text>

@@ -5,9 +5,9 @@ import styles from '../styles.js';
 const OrderStateText = ({ orderState }) => {
   const getResponseStyle = (state) => {
     switch (state) {
-      case 'Entregado':
+      case 'Finalizado':
         return styles.delivered;
-      case 'En busca de recolector':
+      case 'Pendiente':
         return styles.pending;
       case 'Cancelado':
         return styles.cancelled;

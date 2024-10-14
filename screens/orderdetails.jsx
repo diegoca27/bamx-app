@@ -19,7 +19,7 @@ export default function OrderDetails({ route }) {
           <Text style= {{fontWeight: 'bold'}}>Producto: </Text>{foodElement}
         </Text>
         <Text style={styles.textstyle}>
-          <Text style= {{fontWeight: 'bold'}}>Cantidad: </Text>{quantity}
+          <Text style= {{fontWeight: 'bold'}}>Cantidad restante: </Text>{quantity}
         </Text>
         <Text style={styles.textstyle}>
             <Text style={styles.textStyle1}>Precio normal: </Text>

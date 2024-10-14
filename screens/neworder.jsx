@@ -148,7 +148,7 @@ const [errorStep, setErrorStep] = useState({
       ...formData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
       uid: user.uid,
       orderTime: '',
-      orderStatus: 'En busca de recolector',
+      orderStatus: 'Pendiente',
       foodImage: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });
 

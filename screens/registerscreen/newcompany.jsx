@@ -146,6 +146,7 @@ const NewCompany = () => {
     await setDoc(doc(db, "company", user.uid), {
       ...selectedData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
       uid: user.uid,
+      rating: 5,
       userType: 'empresa',
       restaurantImage: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });

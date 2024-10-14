@@ -36,7 +36,7 @@ export default function FoodOrder(props){
                 <Text style = {styles.title}>{props.foodElement}</Text>
                 <OrderStateText orderState={props.orderState}/>
                 <Text style = {styles.subtitle}>
-                    Cantidad: <Text style = {styles.response}>{props.quantity}</Text>
+                    Cantidad restante: <Text style = {styles.response}>{props.quantity}</Text>
                 </Text>
                 <Text style = {styles.subtitle}>
                     Precio normal: $<Text style = {styles.response}>{props.normalPrice}</Text>

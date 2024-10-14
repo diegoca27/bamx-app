@@ -9,7 +9,7 @@ export default function ProfileScreen() {
   const { user } = useContext(UserContext); 
 
   // Renderizar el perfil solo si user está definido
-  if (user) { 
+  if (user.userType == 'persona') { 
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileHeader
@@ -25,7 +25,25 @@ export default function ProfileScreen() {
         />
       </ScrollView>
     );
-  } else {
+  } 
+  else if(user.userType == 'empresa'){
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <ProfileHeader
+          avatar={user.restaurantImage}
+          avatarBackground={user.restaurantImage}
+          name={user.companyName}
+          location={user.address}
+        />
+        <ProfileInfo
+          email={user.email}
+          phone={user.contactPhone}
+          // ... otras props
+        />
+      </ScrollView>
+    );
+  }
+  else {
     return ( 
       <View style={styles.container}>
         <Text>Cargando perfil...</Text> 
