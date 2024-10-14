@@ -249,7 +249,7 @@ export default function App() {
             />
             <Stack.Screen name="QRScanner" 
             component={QRScanner}
-            options={{ title: 'Escanear QR' }} 
+            options={{ headerShown: false }}
             />
             <Stack.Screen name="OrderRedeemed" 
             component={OrderRedemeed} />

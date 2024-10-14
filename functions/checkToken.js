@@ -10,23 +10,24 @@ const checkToken = async (token, navigation, setMessage) => {
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            const status = data.orderStatus;
+            const status = data.status;
 
             console.log(docSnap.data())
-            console.log(data.orderStatus)
+            console.log(data.status)
 
-            if (status === "Pending") {
+            if (status === "Pendiente") {
                 console.log("Código reclamado.");
 
                 navigation.navigate('OrderRedeemed', {
-                    productId: data.productId,
-                    quantity: data.quantity,
-                    totalPrice: data.totalPrice,
-                    userId: data.userId,
+                    customerName: data.customerName,
+                    productId: data.items[0].productId,
+                    quantity: data.items[0].quantity,
+                    totalPrice: data.totalAmount,
+                    userId: data.customerId,
                 });
 
                 await updateDoc(docRef, {
-                    orderStatus: "Usado"
+                    status: "Usado"
                 });
             } else {
                 setMessage("Esta orden ya ha sido reclamada.");
