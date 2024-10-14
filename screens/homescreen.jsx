@@ -40,7 +40,9 @@ export default function HomeScreen() {
             orderState={order.orderStatus}
             quantity={order.quantity}
             imageURL={order.foodImage}
-            price = {order.totalPrice}
+            offerPrice = {order.offerPrice}
+            normalPrice = {order.normalPrice}
+            additionalNotes = {order.additionalNotes}
           />
         ))}
         </ScrollView>

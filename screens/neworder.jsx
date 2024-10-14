@@ -15,13 +15,15 @@ const [isImageUploaded, setIsImageUploaded] = useState(false);
 const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
 const [errorStep, setErrorStep] = useState({
     productName: '',
-    totalPrice: '',
+    offerPrice: '',
+    normalPrice: '',
     foodImage: '',
   });
   const [formData, setFormData] = useState({
     productName: '',
     quantity: 1,
-    totalPrice: '',
+    offerPrice: '',
+    normalPrice: '',
     orderTime: '',
     foodImage: '',
     additionalNotes: '',
@@ -145,9 +147,8 @@ const [errorStep, setErrorStep] = useState({
     await setDoc(doc(db, "offers", new Date().getTime().toString()), {
       ...formData,  // Incluye todos los datos del formulario, incluida la URL de la imagen
       uid: user.uid,
-      orderTime: new Date(),
+      orderTime: '',
       orderStatus: 'En busca de recolector',
-      rating: 5,
       foodImage: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });
 
@@ -165,8 +166,11 @@ const [errorStep, setErrorStep] = useState({
     if(formData.productName == ''){
       newErrors.productName = 'Este campo es obligatorio';
     }
-    if(formData.totalPrice == ''){
-      newErrors.totalPrice = 'Este campo es obligatorio';
+    if(formData.normalPrice == ''){
+      newErrors.normalPrice = 'Este campo es obligatorio';
+    }
+    if(formData.offerPrice == ''){
+      newErrors.offerPrice = 'Este campo es obligatorio';
     }
     if(!isImageUploaded){
       newErrors.foodImage = 'Este campo es obligatorio';
@@ -210,16 +214,26 @@ const [errorStep, setErrorStep] = useState({
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.label}>Precio: <Text style={styles.errorText}>*</Text></Text>
+      <Text style={styles.label}>Precio de oferta: <Text style={styles.errorText}>*</Text></Text>
       <TextInput
         style={styles.input}
         keyboardType='numeric'
         onChangeText={text => {
-          setFormData({ ...formData, totalPrice: text });
+          setFormData({ ...formData, offerPrice: text });
         }}
-        value={formData.totalPrice}
+        value={formData.offerPrice}
       />
-      {errorStep ? <Text style={styles.errorText}>{errorStep.totalPrice}</Text> : null}
+      {errorStep ? <Text style={styles.errorText}>{errorStep.offerPrice}</Text> : null}
+      <Text style={styles.label}>Precio normal: <Text style={styles.errorText}>*</Text></Text>
+      <TextInput
+        style={styles.input}
+        keyboardType='numeric'
+        onChangeText={text => {
+          setFormData({ ...formData, normalPrice: text });
+        }}
+        value={formData.normalPrice}
+      />
+      {errorStep ? <Text style={styles.errorText}>{errorStep.normalPrice}</Text> : null}
 
         <View style={{marginBottom: 12}}>
         <Text style={styles.label}>Sube una imagen del producto: <Text style = {styles.errorText}>*</Text></Text>

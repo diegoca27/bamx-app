@@ -12,7 +12,10 @@ export default function FoodOrder(props){
           foodElement: props.foodElement, 
           orderState: props.orderState, 
           quantity: props.quantity,
-          imageURL: props.imageURL
+          offerPrice: props.offerPrice,
+          normalPrice: props.normalPrice,
+          imageURL: props.imageURL,
+          additionalNotes: props.additionalNotes
         });
       };
 
@@ -36,7 +39,10 @@ export default function FoodOrder(props){
                     Cantidad: <Text style = {styles.response}>{props.quantity}</Text>
                 </Text>
                 <Text style = {styles.subtitle}>
-                    Precio: $<Text style = {styles.response}>{props.price}</Text>
+                    Precio normal: $<Text style = {styles.response}>{props.normalPrice}</Text>
+                </Text>
+                <Text style = {styles.subtitle}>
+                    Precio en oferta: $<Text style = {styles.response}>{props.offerPrice}</Text>
                 </Text>
             </View>
         </View>

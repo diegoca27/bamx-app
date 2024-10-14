@@ -10,9 +10,12 @@ import { auth } from '../../config/firebaseConfig';
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useNavigation } from "@react-navigation/native";
 
 
 const NewCompany = () => {
+  const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
 
@@ -22,6 +25,11 @@ const NewCompany = () => {
   const [isNextEnabled, setIsNextEnabled] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [prevStep, setPrevStep] = useState(0);
+
+  const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
+  const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
+  const [openTime, setOpenTime] = useState(new Date());
+  const [closeTime, setCloseTime] = useState(new Date());
 
   const handleNext = () => {
     setActiveStep(prevStep => prevStep + 1);
@@ -43,6 +51,8 @@ const NewCompany = () => {
   const [errorStep2, setErrorStep2] = useState({
     address: '',
     contactPerson: '',
+    openTime: '',
+    closeTime: '',
     website: '',
     companyRFC: '',
     restaurantImage: '',
@@ -58,6 +68,8 @@ const NewCompany = () => {
     contactPerson: '',
     website: '', 
     companyRFC: '',
+    openTime: '',
+    closeTime: '',
     restaurantImage: '',
   });
 
@@ -101,7 +113,7 @@ const NewCompany = () => {
   };
 
   const handleSubmit = async() => {
-    const { companyName, email, password, contactPhone, address, contactPerson, website, companyRFC, restaurantImage } = formData;
+    const { companyName, email, password, contactPhone, address, contactPerson, openTime, closeTime, website, companyRFC, restaurantImage } = formData;
 
   try {
     // Si no se ha seleccionado imagen, devuelve un mensaje de error
@@ -111,6 +123,8 @@ const NewCompany = () => {
       contactPhone,
       address,
       contactPerson,
+      openTime,
+      closeTime,
       website,
       companyRFC,
       restaurantImage,
@@ -135,8 +149,9 @@ const NewCompany = () => {
       userType: 'empresa',
       restaurantImage: downloadURL, // Asegúrate de que este campo siempre se guarde correctamente
     });
-
+    
     console.log("Datos guardados exitosamente en Firestore");
+    navigation.navigate('Login')
   } catch (error) {
     console.error("error al registrar usuario o guardar datos:", error);
   }
@@ -219,6 +234,24 @@ const NewCompany = () => {
     setFormData({ ...formData, contactPhone: phoneNumber});
   };
 
+  const handleOpenTimeChange = (event, selectedTime) => {
+    setShowOpenTimePicker(false);
+    if (selectedTime) {
+      setOpenTime(selectedTime);
+      const timeString = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setFormData({ ...formData, openTime: timeString });
+    }
+  };
+
+  const handleCloseTimeChange = (event, selectedTime) => {
+    setShowCloseTimePicker(false);
+    if (selectedTime) {
+      setCloseTime(selectedTime);
+      const timeString = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setFormData({ ...formData, closeTime: timeString });
+    }
+  };
+
   const validateStep1 = () => {
     setIsNextEnabled(false);
     const newErrors = {};
@@ -266,6 +299,12 @@ const NewCompany = () => {
       }
       if(formData.contactPerson == ''){
         newErrors2.contactPerson = 'Este campo es obligatorio';
+      }
+      if(formData.openTime == ''){
+        newErrors2.openTime = 'Elige una hora válida'
+      }
+      if(formData.closeTime == ''){
+        newErrors2.closeTime = 'Elige una hora válida'
       }
       if(formData.website == ''){
         newErrors2.website = 'Este campo es obligatorio';
@@ -389,6 +428,44 @@ const NewCompany = () => {
             onChangeText={text => setFormData({ ...formData, contactPerson: text })}
           />
           {errorStep2 ? <Text style={styles.errorText}>{errorStep2.contactPerson}</Text> : null}
+          <Text style={styles.label}>Hora de Apertura:</Text>
+      <TouchableOpacity onPress={() => setShowOpenTimePicker(true)}>
+        <TextInput
+          style={styles.timeSelector}
+          value={formData.openTime}
+          editable={false}
+          placeholder='H:M AM/PM'
+        />
+      </TouchableOpacity>
+      {showOpenTimePicker && (
+        <DateTimePicker
+          value={openTime}
+          mode="time"
+          display="default"
+          onChange={handleOpenTimeChange}
+        />
+      )}
+      {errorStep2 ? <Text style={styles.errorText}>{errorStep2.openTime}</Text> : null}
+
+      {/* Selección de hora de cierre */}
+      <Text style={styles.label}>Hora de Cierre:</Text>
+      <TouchableOpacity onPress={() => setShowCloseTimePicker(true)}>
+        <TextInput
+          style={styles.timeSelector}
+          value={formData.closeTime}
+          editable={false}
+          placeholder='H:M AM/PM'
+        />
+      </TouchableOpacity>
+      {showCloseTimePicker && (
+        <DateTimePicker
+          value={closeTime}
+          mode="time"
+          display="default"
+          onChange={handleCloseTimeChange}
+        />
+      )}
+      {errorStep2 ? <Text style={styles.errorText}>{errorStep2.closeTime}</Text> : null}
           <Text style={styles.label}>Sitio Web:</Text>
           <TextInput
           value={formData.website}
@@ -455,11 +532,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginVertical: 10,
   },
+  timeSelector:{
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    width: 100,
+    textAlign:'center',
+    color: '#000',
+  },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 0.5,
-    marginBottom: 20,
+    marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 12,
   },

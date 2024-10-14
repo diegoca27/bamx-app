@@ -11,8 +11,10 @@ import { auth } from '../../config/firebaseConfig';
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigation } from "@react-navigation/native";
 
 const NewPerson = () => {
+  const navigation = useNavigation();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [passwordError, setpasswordError] =  useState('');
   const [errorStep1, setErrorStep1] = useState({
@@ -247,6 +249,7 @@ const NewPerson = () => {
     });
 
     console.log("Datos guardados exitosamente en Firestore");
+    navigation.navigate('Login')
   } catch (error) {
     console.error("error al registrar usuario o guardar datos:", error);
   }
