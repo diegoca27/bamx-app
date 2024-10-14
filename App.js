@@ -251,7 +251,7 @@ export default function App() {
             component={QRScanner}
             options={{ headerShown: false }}
             />
-            <Stack.Screen name="OrderRedeemed" 
+            <Stack.Screen name="Orden Reclamada" 
             component={OrderRedemeed} />
           </Stack.Navigator>
         </NavigationContainer>
