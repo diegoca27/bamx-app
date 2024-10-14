@@ -83,6 +83,24 @@ const NewCompany = () => {
     setPrevStep(activeStep)
   }, [activeStep, formData, isImageUploaded]); 
 
+  const geocodeAddress = async (address) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        return { lat, lon };
+      } else {
+        throw new Error('No se encontraron resultados para la dirección proporcionada.');
+      }
+    } catch (error) {
+      console.error('Error al obtener las coordenadas:', error);
+      throw error;
+    }
+  };  
+
   const handleImageUpload = async(uri) => {
     try {
       const response = await fetch(uri);
@@ -116,6 +134,17 @@ const NewCompany = () => {
     const { companyName, email, password, contactPhone, address, contactPerson, openTime, closeTime, website, companyRFC, restaurantImage } = formData;
 
   try {
+
+    // Verificar que se haya ingresado una dirección
+     if (!address) {
+      console.error("Por favor ingrese una dirección válida.");
+      return;
+    }
+
+    // Obtener las coordenadas (lat y lon) de la dirección
+    const { lat, lon } = await geocodeAddress(address);
+    console.log(`Coordenadas obtenidas: Latitud: ${lat}, Longitud: ${lon}`);
+
     // Si no se ha seleccionado imagen, devuelve un mensaje de error
     const selectedData = {
       companyName,
@@ -128,6 +157,8 @@ const NewCompany = () => {
       website,
       companyRFC,
       restaurantImage,
+      lat,
+      lon,
     };
 
     // Subir la imagen primero

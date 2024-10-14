@@ -10,9 +10,8 @@ import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { UserContext } from '../context/UserContext';
 import { useNavigation } from '@react-navigation/native';
-import { v4 as uuidv4 } from 'uuid';
-
-import InstructionsScreen from './instructionscreen';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,132 +30,20 @@ const generateRandomLocation = (latitude, longitude, radiusInKm) => {
   return { latitude: newLatitude, longitude: newLongitude };
 };
 
-const sampleData = [
-  {
-    id: 1,
-    name: 'Restaurante A',
-    type: 'Comida Preparada',
-    rating: 4.5,
-    distance: '0.8',
-    time: '10-15 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: false,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-    originalPrice: '15',
-    price: '1500',
-    availableQuantity: 5,
-  },
-  {
-    id: 2,
-    name: 'Soriana',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-    availableQuantity: 3,
-  },
-  {
-    id: 3,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 4,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 5,
-    name: ' B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 6,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 7,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 8,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 9,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  {
-    id: 10,
-    name: 'Banco de Alimentos B',
-    type: 'Ingredientes',
-    rating: 4.8,
-    distance: '1.2',
-    time: '15-20 min',
-    image: require('../assets/prepared-food.png'),
-    isFree: true,
-    ...generateRandomLocation(20.73504, -103.45488, 1),
-  },
-  // ... más datos
-];
 
 const HomeScreenPerson = () => {
   const { user } = useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState('');
-  const [data, setData] = useState(sampleData); // Datos filtrados
+  const [data, setData] = useState([]); // Datos filtrados
   const sheetRef = useRef(null);
   const snapPoints = ['40%', '90%'];
   const theme = useTheme();
   const mapRef = useRef(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState({});
+  const [locationReady, setLocationReady] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
+  const [quantity, setQuantity] = useState(1); 
 
   const [markerSize, setMarkerSize] = useState(40); // Tamaño inicial
   const [showMarkers, setShowMarkers] = useState(true); // Inicializar showMarkers
@@ -166,6 +53,63 @@ const HomeScreenPerson = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const [showInstructions, setShowInstructions] = useState(false);
+
+  // Obtener la información de 'offers' de Firebase
+  useEffect(() => {
+    const fetchOffersAndCompany = async () => {
+      try {
+        // Obtener las ofertas
+        const offersCollection = collection(db, 'offers');
+        const offersSnapshot = await getDocs(offersCollection);
+        const offersList = offersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+  
+        // Obtener las compañías
+        const companiesCollection = collection(db, 'company');
+        const companiesSnapshot = await getDocs(companiesCollection);
+        const companiesList = companiesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+  
+        // Combinar ofertas con compañías
+        const mergedData = offersList.map(offer => {
+          const companyInfo = companiesList.find(company => company.uid === offer.uid);
+          return {
+            ...offer,
+            company: companyInfo || null, // Agrega la info de la compañía, si existe
+          };
+        });
+
+        // Convertir lat y lon a números
+        const mergedDataWithNumbers = mergedData.map(item => ({
+          ...item,
+          company: {
+            ...item.company,
+            lat: Number(item.company.lat) || 0,
+            lon: Number(item.company.lon) || 0
+          }
+        }));
+
+        setData(mergedDataWithNumbers); // Guardar la información combinada en el estado
+        setFilteredData(mergedDataWithNumbers);
+        //console.log(mergedDataWithNumbers);
+        
+      } catch (error) {
+        if (error instanceof AggregateError) {
+          // AggregateError contiene múltiples errores.  Imprime cada uno:
+          error.errors.forEach(e => console.error("Error individual:", e));
+        } else {
+          console.error("Error general al obtener datos:", error);
+        }
+      }
+    };
+  
+    fetchOffersAndCompany();
+  }, []);
+  
 
   // Función para manejar la reserva 
   const handleReserve = () => {
@@ -183,49 +127,44 @@ const HomeScreenPerson = () => {
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString();
     const formattedTime = currentDate.toLocaleTimeString();
-
+    console.log('selectedproduct en handlepay:', selectedProduct);
     // 2. Crear orderData
     const orderData = {
       customer: {
-        id: user.id, // Asumiendo que tu usuario tiene un ID
+        id: user.uid, // Asumiendo que tu usuario tiene un ID
         name: user.name, // Obtener el nombre del usuario
         email: user.email,
       },
-      restaurant: {
-        id: selectedProduct.id,
-        name: selectedProduct.name,
+      company: {
+        id: selectedProduct.company.uid,
+        name: selectedProduct.company.companyName,
       },
       items: [
         {
           productId: selectedProduct.id,
-          name: selectedProduct.name,
+          name: selectedProduct.productName,
           quantity: quantity,
-          price: selectedProduct.price,
-          
+          price: selectedProduct.offerPrice,
         },
       ],
-      totalAmount: selectedProduct.price * quantity,
+      totalAmount: selectedProduct.offerPrice * quantity,
+      quantity: quantity,
       date: formattedDate, // Agregar la fecha al pedido
       time: formattedTime, // Agregar la hora al pedido
       paymentMethod: 'Efectivo', // Ejemplo: Efectivo, Tarjeta, etc.
       status: 'Pendiente', // Ejemplo: Pendiente, En proceso, Listo para recoger, etc. 
-      specialInstructions: 'Sin picante, por favor', // Campo para instrucciones especiales
     };
+    const offerId = selectedProduct.id;
+
     setShowInstructions(true);
     setShowConfirmation(false); // Cierra el BottomSheet de confirmación
     productSheetRef.current?.close(); // Cierra el BottomSheet del producto
-    navigation.navigate('Instructions', { orderData }); 
+    navigation.navigate('Instructions', { orderData, offerId }); 
   };
 
   // Función para manejar la selección de un producto
   const handleProductSelect = (product) => {
     setSelectedProduct(product);
-    // Establecer cantidad inicial basándose en la disponibilidad
-    if (product.availableQuantity > 0) {
-      setQuantity(1);
-    } else {
-      setQuantity(0);
-    }
     productSheetRef.current?.expand();
   };
 
@@ -240,6 +179,7 @@ const HomeScreenPerson = () => {
         enablePanDownToClose={true} 
         // Escucha el evento onChange para actualizar el estado isProductSheetOpen
         onChange={(index) => {
+          //console.log('item dentro ', selectedProduct);
           setIsProductSheetOpen(index !== -1);
 
           // Cierra el Bottom Sheet de confirmación al cerrar el de producto
@@ -252,31 +192,35 @@ const HomeScreenPerson = () => {
           <BottomSheetScrollView contentContainerStyle={styles.productSheetScrollContent}>
             <View style={styles.productSheetContent}>
               {/* Imagen del producto */}
-              <Image source={selectedProduct.image} style={styles.productImage} />
+              
+              <Image 
+                source={selectedProduct.foodImage ? { uri: selectedProduct.foodImage } : require('../assets/placeholder.png')}
+                style={styles.productImage} 
+              />
 
               {/* Información del producto */}
               <View style={styles.productInfo}>
                 {/* Header del producto (nombre y rating) */}
                 <View style={styles.productHeader}>
-                  <Text style={styles.productName}>{selectedProduct.name || 'Wallace Market -Neuilly'}</Text>
+                  <Text style={styles.productName}>{selectedProduct.productName || 'Wallace Market -Neuilly'}</Text>
                   <View style={styles.productTypeRating}>
-                    <Text style={styles.productType}>{selectedProduct.type || 'Restaurant'}</Text>
+                    <Text style={styles.productType}>{selectedProduct.company.companyName || 'Restaurant'}</Text>
                     <View style={styles.rating}>
                       <Ionicons name="star" size={16} color="gold" />
-                      <Text style={styles.ratingText}>{selectedProduct.rating || '4.6'}</Text>
+                      <Text style={styles.ratingText}>{selectedProduct.company.rating || '4.6'}</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Precio del producto */}
                 <View style={styles.productPriceContainer}>
-                  {selectedProduct.originalPrice && (
+                  {selectedProduct.normalPrice && (
                     <Text style={styles.productOriginalPrice}>
-                      ${selectedProduct.originalPrice} MXN
+                      ${selectedProduct.normalPrice} MXN
                     </Text>
                   )}
                   <Text style={styles.productPrice}>
-                    ${selectedProduct.price || '3.99'} MXN
+                    ${selectedProduct.offerPrice || '3.99'} MXN
                   </Text>
                 </View>
 
@@ -284,13 +228,13 @@ const HomeScreenPerson = () => {
                 <View style={styles.productSection}>
                   <Ionicons name="location-outline" size={20} color="#666" />
                   <Text style={styles.productInfoText}>
-                    {selectedProduct.address || '6 Boulevard de Neuilly, 92400 Courbevoie, France'}
+                    {selectedProduct.company.address || '6 Boulevard de Neuilly, 92400 Courbevoie, France'}
                   </Text>
                 </View>
                 <View style={styles.productSection}>
                   <Ionicons name="time-outline" size={20} color="#666" />
                   <Text style={styles.productInfoText}>
-                    {selectedProduct.time || '9:15 PM - 10:15 PM'}
+                    {selectedProduct.orderTime || '9:15 PM - 10:15 PM'}
                   </Text>
                 </View>
 
@@ -308,15 +252,15 @@ const HomeScreenPerson = () => {
                   <Image source={require('../assets/basket-outline.png')} style={styles.basketImage} />
                   <View style={styles.basketInfo}>
                     <Text style={styles.basketName}>
-                      {selectedProduct.basketName || 'Panier de fruits et legumes'}
+                      {selectedProduct.titleDescription || 'Notas adicionales'}
                     </Text>
                     <Text style={styles.basketDescription}>
-                      {selectedProduct.basketDescription || 'Un bel assortiment de fruits et legumes en fonction des jour'}
+                      {selectedProduct.additionalNotes || 'Un bel assortiment de fruits et legumes en fonction des jour'}
                     </Text>
                     <View style={styles.basketLeftContainer}>
                       <Ionicons name="basket-outline" size={14} color="#f0b400" />
                       <Text style={styles.basketLeftText}>
-                        {selectedProduct.basketLeft || '2 left'}
+                        {selectedProduct.quantity ? `${selectedProduct.quantity} left` : '2 left'}
                       </Text>
                     </View>
                   </View>
@@ -328,7 +272,7 @@ const HomeScreenPerson = () => {
                 </TouchableOpacity>
 
                 {/* Título de la compra */}
-                <Text style={styles.purchaseTitle}>Purchase of Single basket</Text>
+                <Text style={styles.purchaseTitle}>Compra de Carrito Individual</Text>
 
                 {/* Botón de reserva */}
                 <TouchableOpacity
@@ -344,8 +288,6 @@ const HomeScreenPerson = () => {
       </BottomSheet>
     );
   };
-
-
 
   const handleRegionChangeComplete = (region) => {
     // Ajusta estos valores según tus preferencias
@@ -371,9 +313,6 @@ const HomeScreenPerson = () => {
     Linking.openURL(url);
   };
 
-  // Ubicación actual (inicialmente vacía)
-  const [currentLocation, setCurrentLocation] = useState({});
-
   // Obtener ubicación actual
   useEffect(() => {
     (async () => {
@@ -398,11 +337,20 @@ const HomeScreenPerson = () => {
 
   // Lógica de filtrado para la barra de búsqueda
   useEffect(() => {
-    const filteredData = sampleData.filter(item =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setData(filteredData);
-  }, [searchQuery]);
+    // Filtrar los datos obtenidos de Firebase
+    const filtered = data.filter(item => {
+      const searchTerm = searchQuery.toLowerCase();
+      const productName = item.productName?.toLowerCase();
+      const companyName = item.company?.companyName?.toLowerCase();
+
+      return (
+        productName?.includes(searchTerm) ||
+        companyName?.includes(searchTerm)
+      );
+    });
+
+    setFilteredData(filtered);
+  }, [searchQuery, data]);
 
   const calculateRegion = (location, data) => {
     if (!location.latitude || !location.longitude || data.length === 0) {
@@ -439,24 +387,23 @@ const HomeScreenPerson = () => {
     };
   };
 
-
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handleProductSelect(item)}
       style={[styles.productContainer, selectedItem === item.id && styles.selectedItemContainer]}
     >
       <Image
-        source={item.image ? { uri: 'https://via.placeholder.com/300' } : item.image}
-        style={styles.productImageItem}
-        onError={(error) => console.log('Error al cargar la imagen:', error)}
+      source={item.company.restaurantImage ? { uri: item.company.restaurantImage } : require('../assets/placeholder.png')}
+      style={styles.productImageItem}
+      onError={(error) => console.log('Error al cargar la imagen:', error)}
       />
       <View style={styles.productInfoItem}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemType}>{item.type}</Text>
+        <Text style={styles.itemName}>{item.company.companyName}</Text>
+        <Text style={styles.itemType}>{item.productName}</Text>
         <View style={styles.itemDetails}>
           <View style={styles.rating}>
             <Ionicons name="star" size={16} color="gold" />
-            <Text>{item.rating}</Text>
+            <Text>{item.company.rating}</Text>
           </View>
           <View style={styles.priceContainer}>
             {item.isFree ? (
@@ -465,12 +412,12 @@ const HomeScreenPerson = () => {
               </View>
             ) : (
               <>
-                {item.originalPrice && ( // Mostrar solo si existe precio original
+                {item.normalPrice && ( // Mostrar solo si existe precio original
                   <Text style={styles.originalPrice}>
-                    ${item.originalPrice} MXN
+                    ${item.normalPrice} MXN
                   </Text>
                 )}
-                <Text style={styles.itemPrice}>${item.price} MXN</Text>
+                <Text style={styles.itemPrice}>${item.offerPrice} MXN</Text>
               </>
             )}
           </View>
@@ -478,11 +425,11 @@ const HomeScreenPerson = () => {
         <View style={styles.itemDetails}>
           <View style={styles.detailGroup}>
             <Ionicons name="time-outline" size={16} color="gray" />
-            <Text style={styles.productTime}>{item.time}</Text>
+            <Text style={styles.productTime}>{item.orderTime}</Text>
           </View>
           <View style={styles.detailGroup}>
             <Ionicons name="location-outline" size={16} color="gray" />
-            <Text style={styles.productDistance}>{item.distance} km</Text>
+            <Text style={styles.productDistance}>1 km</Text>
           </View>
         </View>
       </View>
@@ -518,28 +465,18 @@ const HomeScreenPerson = () => {
     productSheetRef.current?.expand();
   };
 
-  // Confirmation section
-  const [quantity, setQuantity] = useState(1); // Estado para la cantidad
-  const [isProductSheetOpen, setIsProductSheetOpen] = useState(false);
-
   const handleIncreaseQuantity = () => {
-    // Obtener la cantidad disponible del producto
-    const availableQuantity = selectedProduct?.availableQuantity || 0;
-
-    // Solo aumentar si la cantidad es menor que la disponible
-    if (quantity < availableQuantity) {
-      setQuantity(quantity + 1);
-    }
+    setQuantity(prevQuantity => prevQuantity + 1);
   };
 
   const handleDecreaseQuantity = () => {
-    setQuantity(prevQuantity => prevQuantity > 1 ? prevQuantity - 1 : 0);
+    setQuantity(prevQuantity => prevQuantity > 1 ? prevQuantity - 1 : 1);
   };
 
 
   const renderConfirmationBottomSheet = () => {
-    const totalPrice = selectedProduct ? selectedProduct.price * quantity : 0;
-
+    const totalPrice = selectedProduct ? selectedProduct.offerPrice * quantity : 0;
+    // console.log('item selected product', selectedProduct);
     // Función para actualizar confirmationSheetRef cuando el BottomSheet se abre
     const handleConfirmationSheetOpen = (sheetInstance) => {
       confirmationSheetRef.current = sheetInstance;
@@ -559,14 +496,14 @@ const HomeScreenPerson = () => {
         <View style={styles.confirmationContainer}>
           {/* Nombre del restaurante */}
           <Text style={styles.restaurantName}>
-            {selectedProduct ? selectedProduct.name : 'Nombre del restaurante'}
+            {selectedProduct ? selectedProduct.company.companyName : 'Nombre del restaurante'}
           </Text>
 
           {/* Hora de recolección */}
           <View style={styles.pickupTimeContainer}>
             <Ionicons name="time-outline" size={15} color="#666" />
             <Text style={styles.pickupTimeText}>
-              Recoger entre {selectedProduct ? selectedProduct.time : 'Hora de recolección'}
+              Recoger entre {selectedProduct ? selectedProduct.orderTime : 'Hora de recolección'}
             </Text>
           </View>
 
@@ -579,7 +516,7 @@ const HomeScreenPerson = () => {
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={handleDecreaseQuantity}
-              disabled={!selectedProduct || quantity <= 0}
+              disabled={!selectedProduct || quantity <= 1}
             >
               <Text style={styles.quantityButtonText}>-</Text>
             </TouchableOpacity>
@@ -587,7 +524,7 @@ const HomeScreenPerson = () => {
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={handleIncreaseQuantity}
-              disabled={quantity >= (selectedProduct?.availableQuantity || 0)}
+              disabled={quantity >= (selectedProduct?.quantity || 0)}
             >
               <Text style={styles.quantityButtonText}>+</Text>
             </TouchableOpacity>
@@ -633,17 +570,13 @@ const HomeScreenPerson = () => {
             style={styles.buyButton}
             onPress={handlePayment}
             disabled={quantity === 0}
-            
           >
             <Text style={styles.buyButtonText}>Pagar en efectivo</Text>
-
           </TouchableOpacity>
-
         </View>
       </BottomSheet>
     );
   };
-
 
 
   return (
@@ -658,28 +591,33 @@ const HomeScreenPerson = () => {
           onPress={handleMapPress}
           onRegionChangeComplete={handleRegionChangeComplete}
         >
-          {showMarkers && data.map((marker, index) => (
+          {data.map((item) => {
+          if (!item.company || typeof item.company.lat !== 'number' || typeof item.company.lon !== 'number') {
+            console.warn(`Coordenadas faltantes o inválidas para la oferta ${item.id}`, item);
+            return null;
+          }
+          return (
             <Marker
-              key={marker.id}
+              key={item.id}
               coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
+                latitude: item.company.lat,
+                longitude: item.company.lon,
               }}
-              onPress={() => handleMarkerPress(marker)}
-              onCalloutPress={() => { }}
+              onPress={() => handleMarkerPress(item)}
             >
               <Image
                 source={
-                  selectedMarkerId === marker.id
+                  selectedMarkerId === item.id
                     ? require('../assets/location.png')
-                    : marker.type === 'Comida Preparada'
+                    : item.productName === 'Hamburguesa'
                       ? require('../assets/prepared-food.png')
                       : require('../assets/basket-outline.png')
                 }
                 style={{ width: markerSize, height: markerSize }}
               />
             </Marker>
-          ))}
+          );
+        })}
         </MapView>
       )}
 
@@ -698,7 +636,7 @@ const HomeScreenPerson = () => {
           />
         </View>
         <BottomSheetFlatList
-          data={data}
+          data={filteredData}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContentContainer}
           renderItem={renderItem}
@@ -709,7 +647,7 @@ const HomeScreenPerson = () => {
       {renderProductBottomSheet()}
 
       {/* Bottom Sheet de confirmación */}
-      {showConfirmation && renderConfirmationBottomSheet()}
+      {showConfirmation && renderConfirmationBottomSheet(selectedProduct)}
 
     </View>
   );

@@ -21,6 +21,7 @@ import MultiStepForm from './components/MultiStepForm';
 import { UserProvider, UserContext } from './context/UserContext';
 import globalStyles from './styles/global';
 import OrderDetails from './screens/orderdetails';
+import OrderDetailsPerson from './screens/orderdetailsperson';
 import InstructionsScreen from './screens/instructionscreen';
 import QRScanner from './functions/QRScanner';
 import NewOrderScreen from './screens/neworder';
@@ -122,7 +123,7 @@ function PersonHome() {
       })}
     >
       <Tab.Screen name="Inicio" component={HomeScreenPerson} options={{ headerShown: false}} />
-      <Tab.Screen name="Historial" component={ArchiveScreen} />
+      <Tab.Screen name="Historial" component={OrderDetailsPerson} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
   );
