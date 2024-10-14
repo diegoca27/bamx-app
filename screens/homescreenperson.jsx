@@ -88,8 +88,8 @@ const HomeScreenPerson = () => {
           ...item,
           company: {
             ...item.company,
-            lat: Number(item.company.lat) || 0,
-            lon: Number(item.company.lon) || 0
+            lat: Number(item.company?.lat ?? 0),
+            lon: Number(item.company?.lon ?? 0)
           }
         }));
 
@@ -234,14 +234,16 @@ const HomeScreenPerson = () => {
                 <View style={styles.productSection}>
                   <Ionicons name="time-outline" size={20} color="#666" />
                   <Text style={styles.productInfoText}>
-                    {selectedProduct.orderTime || '9:15 PM - 10:15 PM'}
+                      {selectedProduct.openTime && selectedProduct.closeTime
+                        ? `${selectedProduct.openTime} - ${selectedProduct.closeTime}`
+                        : '9:15 PM - 10:15 PM'}
                   </Text>
                 </View>
 
                 {/* Botón para ver en el mapa */}
                 <TouchableOpacity
                   style={styles.mapButton}
-                  onPress={() => handleOpenGoogleMaps(selectedProduct.address)}
+                  onPress={() => handleOpenGoogleMaps(selectedProduct.company.address)}
                 >
                   <Ionicons name="map-outline" size={20} color="#007bff" />
                   <Text style={styles.mapButtonText}>Open Google Maps</Text>
@@ -265,11 +267,6 @@ const HomeScreenPerson = () => {
                     </View>
                   </View>
                 </View>
-
-                {/* Botón vegano */}
-                <TouchableOpacity style={styles.veggieButton}>
-                  <Text style={styles.veggieButtonText}>Veggie</Text>
-                </TouchableOpacity>
 
                 {/* Título de la compra */}
                 <Text style={styles.purchaseTitle}>Compra de Carrito Individual</Text>
@@ -425,7 +422,11 @@ const HomeScreenPerson = () => {
         <View style={styles.itemDetails}>
           <View style={styles.detailGroup}>
             <Ionicons name="time-outline" size={16} color="gray" />
-            <Text style={styles.productTime}>{item.orderTime}</Text>
+            <Text style={styles.productTime}>
+              {item.openTime && item.closeTime
+                ? `${item.openTime} - ${item.closeTime}`
+                : '9:15 PM - 10:15 PM'}
+            </Text>
           </View>
           <View style={styles.detailGroup}>
             <Ionicons name="location-outline" size={16} color="gray" />
@@ -476,7 +477,7 @@ const HomeScreenPerson = () => {
 
   const renderConfirmationBottomSheet = () => {
     const totalPrice = selectedProduct ? selectedProduct.offerPrice * quantity : 0;
-    // console.log('item selected product', selectedProduct);
+    console.log('item selected product', selectedProduct);
     // Función para actualizar confirmationSheetRef cuando el BottomSheet se abre
     const handleConfirmationSheetOpen = (sheetInstance) => {
       confirmationSheetRef.current = sheetInstance;
@@ -503,7 +504,9 @@ const HomeScreenPerson = () => {
           <View style={styles.pickupTimeContainer}>
             <Ionicons name="time-outline" size={15} color="#666" />
             <Text style={styles.pickupTimeText}>
-              Recoger entre {selectedProduct ? selectedProduct.orderTime : 'Hora de recolección'}
+              Recoger entre {selectedProduct && selectedProduct.company.openTime && selectedProduct.company.closeTime
+                ? `${selectedProduct.company.openTime} - ${selectedProduct.company.closeTime}`
+                : 'Hora de recolección'}
             </Text>
           </View>
 
